@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { mockConnectionRequests } from '@/data/mockInnovations';
 import { ConnectionRequest } from '@/types/innovategram';
 
+export const dynamic = 'force-static';
+
 export async function GET() {
   return NextResponse.json({
     success: true,

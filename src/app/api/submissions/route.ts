@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { initialInnovations } from '@/data/mockInnovations';
 import { Innovation } from '@/types/innovategram';
 
+export const dynamic = 'force-static';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sector = searchParams.get('sector');

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Sector, Stage } from '@/types/innovategram';
 
+export const dynamic = 'force-static';
+
 export async function POST(request: Request) {
   try {
     const { transcript, language = 'en' } = await request.json();
