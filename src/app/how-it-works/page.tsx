@@ -124,7 +124,7 @@ export default function HowItWorksPage() {
               <Layers className="w-8 h-8" />
             </div>
             <span className="text-xs font-bold text-[#104C35]">ડિજિટલ પ્રોફાઇલ</span>
-            <span className="text-[10px] text-[#6B756E]">ID: IG-2026-XXXX</span>
+            <span className="text-[10px] text-[#6B756E]">ID: KHJ-2026-XXXX</span>
           </div>
 
           <div className="space-y-3 flex-1 text-center md:text-left">

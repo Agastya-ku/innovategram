@@ -87,7 +87,7 @@ export default function MyInnovationsPage() {
           <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-[#6B756E]" />
           <input
             type="text"
-            placeholder="Search by Innovation ID (e.g. IG-2026-001001) or Title..."
+            placeholder="Search by Innovation ID (e.g. KHJ-2026-001001) or Title..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full bg-[#F8FAF7] border border-emerald-900/15 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-[#176B45]"

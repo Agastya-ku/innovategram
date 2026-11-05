@@ -60,7 +60,7 @@ export default function ReportsPage() {
       <div className="bg-white p-6 rounded-2xl border border-emerald-900/10 shadow-xs space-y-3">
         <h3 className="text-base font-bold text-[#104C35]">Policy & Ecosystem Alignment</h3>
         <p className="text-xs text-[#6B756E] leading-relaxed">
-          InnovateGram is engineered to bridge rural inventors directly with Department of Science & Technology (DST), National Innovation Foundation (NIF), Indian Council of Agricultural Research (ICAR), and regional Atal Incubation Centers without requiring corporate intermediaries.
+          KHOJ is engineered to bridge rural inventors directly with Department of Science & Technology (DST), National Innovation Foundation (NIF), Indian Council of Agricultural Research (ICAR), and regional Atal Incubation Centers without requiring corporate intermediaries.
         </p>
       </div>
     </div>

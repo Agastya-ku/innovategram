@@ -16,23 +16,24 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('en');
+  // Default language is Gujarati ('gu') for first-time visitors as per KHOJ requirements
+  const [language, setLanguageState] = useState<Language>('gu');
 
   useEffect(() => {
-    const saved = localStorage.getItem('innovategram_lang') as Language;
+    const saved = localStorage.getItem('khoj_lang') as Language;
     if (saved && (saved === 'en' || saved === 'hi' || saved === 'gu')) {
       setLanguageState(saved);
       document.documentElement.lang = saved;
     } else {
-      setLanguageState('en');
-      document.documentElement.lang = 'en';
+      setLanguageState('gu');
+      document.documentElement.lang = 'gu';
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('innovategram_lang', lang);
+      localStorage.setItem('khoj_lang', lang);
       document.documentElement.lang = lang;
     }
   };
@@ -40,28 +41,28 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const t = (key: keyof typeof translations): string => {
     const entry = translations[key];
     if (!entry) return String(key);
-    return entry[language] || entry.en || String(key);
+    return entry[language] || entry.gu || entry.en || entry.hi || String(key);
   };
 
   const tSector = (sector: any): string => {
     if (!sector) return '';
     const entry = (sectorTranslations as any)[sector];
     if (!entry) return String(sector);
-    return entry[language] || entry.en || String(sector);
+    return entry[language] || entry.gu || entry.en || String(sector);
   };
 
   const tStage = (stage: any): string => {
     if (!stage) return '';
     const entry = (stageTranslations as any)[stage];
     if (!entry) return String(stage);
-    return entry[language] || entry.en || String(stage);
+    return entry[language] || entry.gu || entry.en || String(stage);
   };
 
   const tStatus = (status: any): string => {
     if (!status) return '';
     const entry = (statusTranslations as any)[status];
     if (!entry) return String(status);
-    return entry[language] || entry.en || String(status);
+    return entry[language] || entry.gu || entry.en || String(status);
   };
 
   return (
@@ -78,4 +79,3 @@ export const useLanguage = () => {
   }
   return context;
 };
-

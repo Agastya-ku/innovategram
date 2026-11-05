@@ -12,14 +12,24 @@ export type StakeholderRole =
 export const translations = {
   // Brand & General
   brandName: {
-    en: 'InnovateGram',
-    hi: 'इनोवेटग्राम',
-    gu: 'ઇનોવેટગ્રામ'
+    en: 'KHOJ',
+    hi: 'खोज',
+    gu: 'ખોજ'
+  },
+  brandHindi: {
+    en: 'खोज',
+    hi: 'खोज',
+    gu: 'ખોજ'
   },
   tagline: {
-    en: 'AI-Powered Grassroots & Rural Innovation Discovery Platform',
-    hi: 'एआई-संचालित ग्रामीण एवं जमीनी नवाचार खोज मंच',
-    gu: 'એઆઈ-આધારિત ગ્રામીણ અને પાયાના આવિષ્કારોનું રાષ્ટ્રીય મંચ'
+    en: 'छोटा या बड़ा, हर आविष्कार पहचान का हकदार।',
+    hi: 'छोटा या बड़ा, हर आविष्कार पहचान का हकदार।',
+    gu: 'छोटा या बड़ा, हर आविष्कार पहचान का हकदार।'
+  },
+  taglineTranslated: {
+    en: 'Small or big, every invention deserves recognition.',
+    hi: 'छोटा या बड़ा, हर आविष्कार पहचान का हकदार।',
+    gu: 'નાનો કે મોટો, દરેક આવિષ્કાર ઓળખને લાયક.'
   },
   portalInnovator: {
     en: 'Innovator Portal',
@@ -347,9 +357,9 @@ export const translations = {
     gu: '૫-પગલાંની ચિત્રાત્મક પ્રક્રિયા પ્રવાસ'
   },
   infographicTitle: {
-    en: 'How InnovateGram Works',
-    hi: 'इनोवेटग्राम कैसे काम करता है',
-    gu: 'ઇનોવેટગ્રામ કેવી રીતે કાર્ય કરે છે'
+    en: 'How KHOJ Works',
+    hi: 'खोज कैसे काम करता है',
+    gu: 'ખોજ કેવી રીતે કાર્ય કરે છે'
   },
   infographicSubtitle: {
     en: 'From a village idea spoken in your native tongue to national incubation and support.',
@@ -693,9 +703,9 @@ export const translations = {
     gu: 'અમારી ટીમ અને નિષ્ણાતો ટૂંક સમયમાં તેની સમીક્ષા કરશે. તમારી આઈડી સાચવો.'
   },
   innovationIdLabel: {
-    en: 'Innovation ID',
-    hi: 'नवाचार पहचान संख्या (ID)',
-    gu: 'આવિષ્કાર આઈડી'
+    en: 'KHOJ ID',
+    hi: 'KHOJ आईडी',
+    gu: 'ખોજ ID'
   },
   saveReceiptBtn: {
     en: 'Save / Print Receipt',
@@ -901,6 +911,248 @@ export const translations = {
     en: 'DEMONSTRATION RECORD - For platform preview & testing purposes',
     hi: 'डेमो रिकॉर्ड - केवल प्लेटफ़ॉर्म पूर्वावलोकन एवं परीक्षण के लिए',
     gu: 'ડેમો રેકોર્ડ - ફક્ત પ્લેટફોર્મ ચકાસણી અને પરીક્ષણ માટે'
+  },
+
+  // KHOJ Brand & Hero
+  khojHeroHeadline: {
+    en: 'Have you created something that solves a problem?',
+    hi: 'क्या आपने कोई ऐसी चीज़ बनाई है जो किसी समस्या का समाधान करती हो?',
+    gu: 'શું તમે કોઈ એવી વસ્તુ બનાવી છે જે સમસ્યાનો ઉપાય કરે?'
+  },
+  khojHeroSubtitle: {
+    en: 'Share your invention with KHOJ. We help people discover your innovation and connect it with the right opportunities.',
+    hi: 'अपने आविष्कार को KHOJ के साथ साझा करें। हम आपकी खोज को सही मौकों और लोगों से जोड़ते हैं।',
+    gu: 'તમારો આવિષ્કાર ખોજ સાથે શેર કરો. અમે તમારી શોધને યોગ્ય તકો અને સંસ્થાઓ સાથે જોડીએ છીએ.'
+  },
+  registerInnovationBtn: {
+    en: 'Register an Innovation',
+    hi: 'आविष्कार पंजीकृत करें',
+    gu: 'આવિષ્કાર નોંધો'
+  },
+  welcomeBackQuestion: {
+    en: 'Have you registered with KHOJ before?',
+    hi: 'क्या आपने पहले KHOJ पर पंजीकरण किया है?',
+    gu: 'શું તમે પહેલાં ખોજ પર નોંધણી કરી છે?'
+  },
+  newUserOption: {
+    en: 'I am new to KHOJ.',
+    hi: 'मैं KHOJ पर नया हूँ।',
+    gu: 'હું KHOJ પર નવો છું.'
+  },
+  newUserOptionDesc: {
+    en: "First time here? Let's create your simple innovator profile in minutes.",
+    hi: 'पहली बार आए हैं? कुछ ही मिनटों में अपनी सरल प्रोफ़ाइल बनाएं।',
+    gu: 'પહેલી વાર આવ્યા છો? થોડી જ મિનિટોમાં તમારી સરળ પ્રોફાઇલ બનાવો.'
+  },
+  existingUserOption: {
+    en: 'I have already registered.',
+    hi: 'मैंने पहले पंजीकरण किया है।',
+    gu: 'મેં અગાઉ નોંધણી કરી છે.'
+  },
+  existingUserOptionDesc: {
+    en: 'Log in with your verified phone number to view or manage your innovations.',
+    hi: 'अपने आविष्कारों को देखने या प्रबंधित करने के लिए अपने सत्यापित फोन नंबर से लॉग इन करें।',
+    gu: 'તમારા આવિષ્કારો જોવા અથવા નવા ઉમેરવા તમારા ફોન નંબર વડે લૉગ ઇન કરો.'
+  },
+  createProfileHeading: {
+    en: "Let's create your profile.",
+    hi: 'आइए आपकी प्रोफ़ाइल बनाएं।',
+    gu: 'ચાલો, તમારી પ્રોફાઇલ બનાવીએ.'
+  },
+  createProfileSubtitle: {
+    en: 'Answer simple questions verbally or type below. No paperwork required.',
+    hi: 'सरल सवालों के जवाब बोलकर दें या नीचे लिखें। किसी कागजी कार्रवाई की आवश्यकता नहीं है।',
+    gu: 'સરળ સવાલોના જવાબ બોલીને આપો અથવા નીચે લખો. કોઈ કાગળિયાની જરૂર નથી.'
+  },
+  profileFullName: {
+    en: 'Full Name',
+    hi: 'पूरा नाम',
+    gu: 'પૂરું નામ'
+  },
+  profilePhone: {
+    en: 'Mobile Number',
+    hi: 'मोबाइल नंबर',
+    gu: 'મોબાઇલ નંબર'
+  },
+  profileState: {
+    en: 'State',
+    hi: 'राज्य',
+    gu: 'રાજ્ય'
+  },
+  profileDistrict: {
+    en: 'District',
+    hi: 'जिला',
+    gu: 'જિલ્લો'
+  },
+  profileVillage: {
+    en: 'Village / Town',
+    hi: 'गांव / कस्बा',
+    gu: 'ગામ / કસ્બો'
+  },
+  profileVisibilityLabel: {
+    en: 'Profile Visibility',
+    hi: 'प्रोफ़ाइल दृश्यता',
+    gu: 'પ્રોફાઇલ દૃશ્યતા'
+  },
+  profilePublic: {
+    en: 'Public (Discoverable by everyone)',
+    hi: 'सार्वजनिक (सभी को दिखाई देगा)',
+    gu: 'જાહેર (બધાને દેખાશે)'
+  },
+  profilePrivate: {
+    en: 'Private (Visible only through authorized consent)',
+    hi: 'निजी (केवल अधिकृत अनुमति से दिखाई देगा)',
+    gu: 'ખાનગી (માત્ર મંજૂરી સાથે દેખાશે)'
+  },
+  profilePublicDesc: {
+    en: 'Your permitted profile and public innovations will appear on discovery maps and directories.',
+    hi: 'आपकी स्वीकृत प्रोफ़ाइल और नवाचार खोज नक्शे और निर्देशिका में दिखाई देंगे।',
+    gu: 'તમારી પ્રોફાઇલ અને આવિષ્કારો નકશા અને ડિરેક્ટરી પર દેખાશે.'
+  },
+  profilePrivateDesc: {
+    en: 'Your profile remains confidential. Stakeholders must request permission to connect.',
+    hi: 'आपकी प्रोफ़ाइल गोपनीय रहेगी। संपर्क करने के लिए संस्थाओं को अनुमति मांगनी होगी।',
+    gu: 'તમારી પ્રોફાઇલ ખાનગી રહેશે. સંપર્ક કરવા સંસ્થાઓએ પરવાનગી માગવી પડશે.'
+  },
+  otpSendBtn: {
+    en: 'Send OTP',
+    hi: 'OTP भेजें',
+    gu: 'OTP મોકલો'
+  },
+  otpVerifyBtn: {
+    en: 'Verify OTP',
+    hi: 'OTP सत्यापित करें',
+    gu: 'OTP ચકાસો'
+  },
+  otpLabel: {
+    en: '6-Digit OTP Code',
+    hi: '6-अंकीय OTP कोड',
+    gu: '૬-આંકડાનો OTP કોડ'
+  },
+  otpSentMsg: {
+    en: 'OTP sent to your mobile number.',
+    hi: 'OTP आपके मोबाइल नंबर पर भेजा गया है।',
+    gu: 'તમારા મોબાઇલ નંબર પર OTP મોકલાયો છે.'
+  },
+  phoneVerifiedMsg: {
+    en: 'Phone number verified successfully!',
+    hi: 'फोन नंबर सफलतापूर्वक सत्यापित हुआ!',
+    gu: 'ફોન નંબર સફળતાપૂર્વક ચકાસાઈ ગયો!'
+  },
+  profileReadyHeading: {
+    en: 'Your profile is ready!',
+    hi: 'आपकी प्रोफ़ाइल तैयार है!',
+    gu: 'તમારી પ્રોફાઇલ તૈયાર છે!'
+  },
+  profileReadySubtitle: {
+    en: 'Your KHOJ Innovator Profile has been created. Now share your first invention or assist someone.',
+    hi: 'आपकी KHOJ प्रोफ़ाइल बन गई है। अब अपना पहला आविष्कार साझा करें या किसी अन्य की मदद करें।',
+    gu: 'તમારી ખોજ પ્રોફાઇલ તૈયાર થઈ ગઈ છે. હવે તમારો પહેલો આવિષ્કાર રજૂ કરો અથવા કોઈની મદદ કરો.'
+  },
+  registerAnotherInnovation: {
+    en: 'Register Another Innovation',
+    hi: 'एक और आविष्कार पंजीकृत करें',
+    gu: 'બીજો આવિષ્કાર નોંધો'
+  },
+  registerOnBehalf: {
+    en: 'Register on Behalf of Someone Else',
+    hi: 'किसी अन्य व्यक्ति के लिए पंजीकृत करें',
+    gu: 'અન્ય વ્યક્તિ વતી નોંધણી કરો'
+  },
+  myDashboardHeading: {
+    en: 'Innovator Dashboard',
+    hi: 'नवाचारकर्ता डैशबोर्ड',
+    gu: 'આવિષ્કારક ડેશબોર્ડ'
+  },
+  myProfileSection: {
+    en: 'My Profile',
+    hi: 'मेरी प्रोफ़ाइल',
+    gu: 'મારી પ્રોફાઇલ'
+  },
+  myInnovationsSection: {
+    en: 'My Innovations',
+    hi: 'मेरे आविष्कार',
+    gu: 'મારા આવિષ્કારો'
+  },
+  loginWithPhone: {
+    en: 'Log in with your Phone Number',
+    hi: 'अपने फोन नंबर से लॉग इन करें',
+    gu: 'તમારા ફોન નંબર વડે લૉગ ઇન કરો'
+  },
+  demoModeNotice: {
+    en: '⚠️ DEMONSTRATION MODE: Phone verification is simulated. Code 123456 is pre-filled for quick testing.',
+    hi: '⚠️ डेमो मोड: फोन सत्यापन सिमुलेटेड है। त्वरित परीक्षण के लिए कोड 123456 पूर्व-भरा है।',
+    gu: '⚠️ ડેમો મોડ: ફોન વેરિફિકેશન સિમ્યુલેટેડ છે. ઝડપી ચકાસણી માટે ૧૨૩૪૫૬ કોડ પહેલેથી લખેલો છે.'
+  },
+  discoverHeading: {
+    en: 'Discover Innovations Around You',
+    hi: 'अपने आसपास के आविष्कार खोजें',
+    gu: 'તમારી આસપાસના આવિષ્કારો શોધો'
+  },
+  socialLinksOptional: {
+    en: 'Social Media Links (Optional)',
+    hi: 'सोशल मीडिया लिंक (वैकल्पिक)',
+    gu: 'સોશ્યલ મીડિયા લિંક્સ (વૈકલ્પિક)'
+  },
+  editProfileBtn: {
+    en: 'Edit Profile',
+    hi: 'प्रोफ़ाइल संपादित करें',
+    gu: 'પ્રોફાઇલ સંપાદિત કરો'
+  },
+  submissionStatusLabel: {
+    en: 'Review & Verification Status',
+    hi: 'समीक्षा एवं सत्यापन स्थिति',
+    gu: 'ચકાસણી અને સમીક્ષા સ્ટેટસ'
+  },
+  viewInnovationBtn: {
+    en: 'View Innovation',
+    hi: 'आविष्कार देखें',
+    gu: 'આવિષ્કાર જુઓ'
+  },
+  metricSectors: {
+    en: 'Sectors',
+    hi: 'क्षेत्र',
+    gu: 'ક્ષેત્રો'
+  },
+  metricStates: {
+    en: 'States',
+    hi: 'राज्य',
+    gu: 'રાજ્યો'
+  },
+  khojTaglineDisplay: {
+    en: 'Small or big, every invention deserves recognition.',
+    hi: 'छोटा या बड़ा, हर आविष्कार पहचान का हकदार।',
+    gu: 'નાનો કે મોટો, દરેક આવિષ્કાર ઓળખને લાયક.'
+  },
+  stepVoiceFooter: {
+    en: 'Voice or Photo',
+    hi: 'आवाज़ या फोटो',
+    gu: 'અવાજ અથવા ફોટો'
+  },
+  stepTranslateFooter: {
+    en: '3-Language Translation',
+    hi: '3 भाषाओं में अनुवाद',
+    gu: '૩ ભાષાઓમાં રૂપાંતર'
+  },
+  stepMapFooter: {
+    en: 'Digital India Map',
+    hi: 'डिजिटल इंडिया नक्शा',
+    gu: 'ડિજિટલ ભારત નકશો'
+  },
+  stepGrantFooter: {
+    en: 'Grants & Incubation',
+    hi: 'अनुदान और इनक्यूबेशन',
+    gu: 'અનુદાન & ઇનક્યુબેશન'
+  },
+  aadhaarNotRequired: {
+    en: 'Aadhaar, GST or paperwork NOT required',
+    hi: 'आधार, जीएसटी या कागजी कार्रवाई की आवश्यकता नहीं',
+    gu: 'આધાર, GST કે સરકારી કાગળિયા જરૂરી નથી'
+  },
+  helperConsentBadge: {
+    en: 'Helper Mode • Inventor Retains Sole Credit',
+    hi: 'सहायक मोड • मूल आविष्कारक को ही पूरा श्रेय',
+    gu: 'સહાયક મોડ • શોધનો યશ ફક્ત મૂળ આવિષ્કારકને'
   }
 };
 
@@ -1006,6 +1258,16 @@ export const stageTranslations: Record<Stage, Record<Language, string>> = {
 };
 
 export const statusTranslations: Record<VerificationStatus, Record<Language, string>> = {
+  Draft: {
+    en: 'Draft',
+    hi: 'प्रारूप (ड्राफ्ट)',
+    gu: 'કાચો મુસદ્દો'
+  },
+  Submitted: {
+    en: 'Submitted',
+    hi: 'जमा किया गया',
+    gu: 'સબમિટ કરેલ'
+  },
   'Pending Review': {
     en: 'Pending Review',
     hi: 'समीक्षा लंबित',
@@ -1016,10 +1278,20 @@ export const statusTranslations: Record<VerificationStatus, Record<Language, str
     hi: 'जांच जारी',
     gu: 'તપાસ ચાલુ'
   },
+  'Additional Information Required': {
+    en: 'Additional Information Required',
+    hi: 'अतिरिक्त जानकारी आवश्यक',
+    gu: 'વધુ માહિતી જરૂરી'
+  },
   Verified: {
-    en: 'Institutional Verified',
-    hi: 'संस्थान द्वारा सत्यापित',
-    gu: 'સંસ્થાકીય રીતે ચકાસાયેલ'
+    en: 'Verified',
+    hi: 'सत्यापित',
+    gu: 'ચકાસાયેલ'
+  },
+  'Not Verified': {
+    en: 'Not Verified',
+    hi: 'असत्यापित',
+    gu: 'ચકાસાયેલ નથી'
   },
   'Needs More Info': {
     en: 'Needs More Info',

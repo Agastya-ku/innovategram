@@ -1,8 +1,8 @@
-import { Innovation } from '@/types/innovategram';
+import { Innovation, InnovatorProfile } from '@/types/innovategram';
 
 export const initialInnovations: Innovation[] = [
   {
-    id: 'IG-2026-001001',
+    id: 'KHJ-2026-001001',
     title: {
       en: 'Low-Cost Agricultural Weed Removal Machine',
       hi: 'कम लागत वाली कृषि खरपतवार हटाने वाली मशीन',
@@ -62,7 +62,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-02'
   },
   {
-    id: 'IG-2026-001002',
+    id: 'KHJ-2026-001002',
     title: {
       en: 'Low-Pressure Gravity Drip Irrigation Kit',
       hi: 'निम्न-दबाव गुरुत्वाकर्षण ड्रिप सिंचाई प्रणाली',
@@ -116,7 +116,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-15'
   },
   {
-    id: 'IG-2026-001003',
+    id: 'KHJ-2026-001003',
     title: {
       en: 'Solar-Powered Modular Rural Lighting & Mobile Hub',
       hi: 'सौर-ऊर्जा चालित मॉड्यूलर ग्रामीण प्रकाश एवं मोबाइल चार्जिंग हब',
@@ -170,7 +170,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-09-18'
   },
   {
-    id: 'IG-2026-001004',
+    id: 'KHJ-2026-001004',
     title: {
       en: 'Multi-Sieve Low-Cost Grain Sorting & Cleaning Machine',
       hi: 'कम लागत वाली बहु-छलनी अनाज सफाई एवं ग्रेडिंग मशीन',
@@ -224,7 +224,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-22'
   },
   {
-    id: 'IG-2026-001005',
+    id: 'KHJ-2026-001005',
     title: {
       en: 'Affordable Solar Pulse Oximeter & Vital Signs Monitor for ASHA Workers',
       hi: 'आशा कार्यकर्ताओं के लिए किफायती सौर पल्स ऑक्सीमीटर एवं वाइटल मॉनिटर',
@@ -278,7 +278,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-10'
   },
   {
-    id: 'IG-2026-001006',
+    id: 'KHJ-2026-001006',
     title: {
       en: 'Stubble-to-Biochar Rapid Pyrolysis Mobile Kiln',
       hi: 'पराली से बायोचार बनाने वाली मोबाइल पायरोलिसिस भट्टी',
@@ -332,7 +332,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-29'
   },
   {
-    id: 'IG-2026-001007',
+    id: 'KHJ-2026-001007',
     title: {
       en: 'Multi-Stage Earthen Pot & Moringa Seed Water Filter',
       hi: 'बहु-स्तरीय मिट्टी के मटके एवं मोरिंगा बीज आधारित जल शोधक',
@@ -386,7 +386,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-09-25'
   },
   {
-    id: 'IG-2026-001008',
+    id: 'KHJ-2026-001008',
     title: {
       en: 'Low-Cost Self-Balancing Assistive Walking Frame for Uneven Terrain',
       hi: 'कच्चे और पथरीले रास्तों के लिए कम लागत वाला स्व-संतुलित वॉकर',
@@ -440,7 +440,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-09-05'
   },
   {
-    id: 'IG-2026-001009',
+    id: 'KHJ-2026-001009',
     title: {
       en: 'Evaporative Bamboo & Khus Cold Storage for Marginal Vegetable Growers',
       hi: 'छोटे सब्जी उत्पादकों के लिए खस और बांस आधारित शीत-कक्ष (कोल्ड स्टोरेज)',
@@ -494,7 +494,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-14'
   },
   {
-    id: 'IG-2026-001010',
+    id: 'KHJ-2026-001010',
     title: {
       en: 'Manual Multi-Row Garlic & Onion Seed Sowing Dispenser',
       hi: 'लहसुन और प्याज की हाथ से बुवाई करने वाला बहु-पंक्ति यंत्र',
@@ -548,7 +548,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-25'
   },
   {
-    id: 'IG-2026-001011',
+    id: 'KHJ-2026-001011',
     title: {
       en: 'Decentralized Sugarcane Bagasse-to-Biogas Digestor Prototype',
       hi: 'गन्ने की खोई से बायो-मीथेन गैस बनाने वाला विकेंद्रीकृत संयंत्र',
@@ -602,7 +602,7 @@ export const initialInnovations: Innovation[] = [
     reviewedAt: '2026-10-27'
   },
   {
-    id: 'IG-2026-001012',
+    id: 'KHJ-2026-001012',
     title: {
       en: 'Offline Audio-Tactile Science Learning Kit for Rural Schools',
       hi: 'ग्रामीण स्कूलों के लिए ऑफलाइन ध्वनि-स्पर्श विज्ञान शिक्षण किट',
@@ -660,7 +660,7 @@ export const initialInnovations: Innovation[] = [
 export const mockConnectionRequests = [
   {
     id: 'CR-2026-0041',
-    innovationId: 'IG-2026-001001',
+    innovationId: 'KHJ-2026-001001',
     innovationTitle: 'Low-Cost Agricultural Weed Removal Machine',
     stakeholderName: 'Dr. Anand Verma',
     organization: 'National Innovation Foundation (NIF) India',
@@ -674,7 +674,7 @@ export const mockConnectionRequests = [
   },
   {
     id: 'CR-2026-0042',
-    innovationId: 'IG-2026-001002',
+    innovationId: 'KHJ-2026-001002',
     innovationTitle: 'Low-Pressure Gravity Drip Irrigation Kit',
     stakeholderName: 'Nisha Mehta',
     organization: 'Aga Khan Rural Support Programme (India)',
@@ -688,7 +688,7 @@ export const mockConnectionRequests = [
   },
   {
     id: 'CR-2026-0043',
-    innovationId: 'IG-2026-001005',
+    innovationId: 'KHJ-2026-001005',
     innovationTitle: 'Affordable Solar Pulse Oximeter & Vital Signs Monitor',
     stakeholderName: 'Vikram Joshi',
     organization: 'Maharashtra Social Innovation Center',
@@ -701,3 +701,59 @@ export const mockConnectionRequests = [
     createdAt: '2026-11-01'
   }
 ];
+
+export const mockInnovatorProfiles: InnovatorProfile[] = [
+  {
+    id: 'KHJ-USR-001001',
+    fullName: 'Ramesh Patel',
+    phone: '9825012345',
+    phoneMasked: '+91 98250 •••••',
+    phoneVerified: true,
+    state: 'Gujarat',
+    district: 'Ahmedabad',
+    villageOrTown: 'Sanand',
+    lat: 22.9856,
+    lng: 72.3789,
+    profileVisibility: 'public',
+    socialLinks: {
+      youtube: 'https://youtube.com/@rameshpatel_innovations',
+      facebook: 'https://facebook.com/rameshpatel.innovations'
+    },
+    createdAt: '2026-08-15',
+    innovationIds: ['KHJ-2026-001003']
+  },
+  {
+    id: 'KHJ-USR-001002',
+    fullName: 'Rameshwar Lal Jat',
+    phone: '9829041289',
+    phoneMasked: '+91 98290 •••••',
+    phoneVerified: true,
+    state: 'Rajasthan',
+    district: 'Nagaur',
+    villageOrTown: 'Khinvsar',
+    lat: 27.0425,
+    lng: 73.4912,
+    profileVisibility: 'public',
+    socialLinks: {
+      youtube: 'https://youtube.com'
+    },
+    createdAt: '2026-09-14',
+    innovationIds: ['KHJ-2026-001001']
+  },
+  {
+    id: 'KHJ-USR-001003',
+    fullName: 'Mansukhbhai Prajapati',
+    phone: '9426278901',
+    phoneMasked: '+91 94262 •••••',
+    phoneVerified: true,
+    state: 'Gujarat',
+    district: 'Morbi',
+    villageOrTown: 'Wankaner',
+    lat: 22.6145,
+    lng: 70.9387,
+    profileVisibility: 'public',
+    createdAt: '2026-07-20',
+    innovationIds: ['KHJ-2026-001005']
+  }
+];
+

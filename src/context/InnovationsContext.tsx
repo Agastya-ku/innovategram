@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Innovation, ConnectionRequest, VerificationStatus, Sector, Stage } from '@/types/innovategram';
-import { initialInnovations, mockConnectionRequests } from '@/data/mockInnovations';
+import { Innovation, ConnectionRequest, VerificationStatus, InnovatorProfile } from '@/types/innovategram';
+import { initialInnovations, mockConnectionRequests, mockInnovatorProfiles } from '@/data/mockInnovations';
 
 interface InnovationsContextType {
   innovations: Innovation[];
@@ -10,6 +10,13 @@ interface InnovationsContextType {
   connectionRequests: ConnectionRequest[];
   isOnline: boolean;
   offlineDraftsCount: number;
+  profiles: InnovatorProfile[];
+  currentProfile: InnovatorProfile | null;
+  addProfile: (profile: Omit<InnovatorProfile, 'id' | 'createdAt' | 'innovationIds'>) => InnovatorProfile;
+  setCurrentProfile: (profile: InnovatorProfile | null) => void;
+  updateProfile: (id: string, updates: Partial<InnovatorProfile>) => void;
+  loginWithPhone: (phone: string) => InnovatorProfile | null;
+  getInnovationsByProfile: (profile: InnovatorProfile) => Innovation[];
   addInnovation: (innovation: Omit<Innovation, 'id' | 'submissionDate'>) => Promise<Innovation>;
   updateInnovationStatus: (id: string, status: VerificationStatus, notes?: string, reviewer?: string) => void;
   updateInnovationAI: (id: string, updates: Partial<Innovation>) => void;
@@ -23,13 +30,14 @@ const InnovationsContext = createContext<InnovationsContextType | undefined>(und
 
 export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [innovations, setInnovations] = useState<Innovation[]>(initialInnovations);
-  const [savedIds, setSavedIds] = useState<string[]>(['IG-2026-001001', 'IG-2026-001005']);
+  const [savedIds, setSavedIds] = useState<string[]>(['KHJ-2026-001001', 'KHJ-2026-001005']);
   const [connectionRequests, setConnectionRequests] = useState<ConnectionRequest[]>(mockConnectionRequests);
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [offlineDrafts, setOfflineDrafts] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<InnovatorProfile[]>(mockInnovatorProfiles);
+  const [currentProfile, setCurrentProfileState] = useState<InnovatorProfile | null>(null);
 
   useEffect(() => {
-    // Network listeners
     if (typeof window !== 'undefined') {
       setIsOnline(navigator.onLine);
       const handleOnline = () => setIsOnline(true);
@@ -37,8 +45,30 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       window.addEventListener('online', handleOnline);
       window.addEventListener('offline', handleOffline);
 
+      // Load stored profiles
+      const storedProfiles = localStorage.getItem('khoj_profiles');
+      if (storedProfiles) {
+        try {
+          const parsed = JSON.parse(storedProfiles);
+          setProfiles([...parsed, ...mockInnovatorProfiles]);
+        } catch (e) {
+          console.error('Error loading stored profiles', e);
+        }
+      }
+
+      // Load current logged in profile
+      const storedCurrentProfileId = localStorage.getItem('khoj_current_profile_id');
+      if (storedCurrentProfileId) {
+        const found = [...(storedProfiles ? JSON.parse(storedProfiles) : []), ...mockInnovatorProfiles].find(
+          (p: InnovatorProfile) => p.id === storedCurrentProfileId
+        );
+        if (found) {
+          setCurrentProfileState(found);
+        }
+      }
+
       // Load stored innovations from localStorage
-      const stored = localStorage.getItem('innovategram_custom_innovations');
+      const stored = localStorage.getItem('khoj_custom_innovations') || localStorage.getItem('innovategram_custom_innovations');
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -49,7 +79,7 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
 
       // Load saved IDs
-      const storedSaved = localStorage.getItem('innovategram_saved');
+      const storedSaved = localStorage.getItem('khoj_saved') || localStorage.getItem('innovategram_saved');
       if (storedSaved) {
         try {
           setSavedIds(JSON.parse(storedSaved));
@@ -57,7 +87,7 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
 
       // Load offline drafts
-      const storedDrafts = localStorage.getItem('innovategram_offline_drafts');
+      const storedDrafts = localStorage.getItem('khoj_offline_drafts') || localStorage.getItem('innovategram_offline_drafts');
       if (storedDrafts) {
         try {
           setOfflineDrafts(JSON.parse(storedDrafts));
@@ -71,31 +101,110 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, []);
 
+  const setCurrentProfile = (profile: InnovatorProfile | null) => {
+    setCurrentProfileState(profile);
+    if (typeof window !== 'undefined') {
+      if (profile) {
+        localStorage.setItem('khoj_current_profile_id', profile.id);
+      } else {
+        localStorage.removeItem('khoj_current_profile_id');
+      }
+    }
+  };
+
+  const addProfile = (profileData: Omit<InnovatorProfile, 'id' | 'createdAt' | 'innovationIds'>): InnovatorProfile => {
+    const newId = `KHJ-USR-00${1000 + profiles.length + 1}`;
+    const today = new Date().toISOString().split('T')[0];
+
+    const newProfile: InnovatorProfile = {
+      ...profileData,
+      id: newId,
+      createdAt: today,
+      innovationIds: []
+    };
+
+    const updated = [newProfile, ...profiles];
+    setProfiles(updated);
+    setCurrentProfile(newProfile);
+
+    if (typeof window !== 'undefined') {
+      const customOnes = updated.filter(p => !mockInnovatorProfiles.some(m => m.id === p.id));
+      localStorage.setItem('khoj_profiles', JSON.stringify(customOnes));
+    }
+
+    return newProfile;
+  };
+
+  const updateProfile = (id: string, updates: Partial<InnovatorProfile>) => {
+    setProfiles(prev => {
+      const updated = prev.map(p => (p.id === id ? { ...p, ...updates } : p));
+      if (typeof window !== 'undefined') {
+        const customOnes = updated.filter(p => !mockInnovatorProfiles.some(m => m.id === p.id));
+        localStorage.setItem('khoj_profiles', JSON.stringify(customOnes));
+      }
+      return updated;
+    });
+
+    if (currentProfile && currentProfile.id === id) {
+      setCurrentProfileState(prev => (prev ? { ...prev, ...updates } : null));
+    }
+  };
+
+  const loginWithPhone = (phoneInput: string): InnovatorProfile | null => {
+    const cleanDigits = phoneInput.replace(/\D/g, '');
+    const found = profiles.find(p => {
+      const pClean = p.phone.replace(/\D/g, '');
+      return pClean.endsWith(cleanDigits) || cleanDigits.endsWith(pClean);
+    });
+
+    if (found) {
+      setCurrentProfile(found);
+      return found;
+    }
+    return null;
+  };
+
+  const getInnovationsByProfile = (profile: InnovatorProfile): Innovation[] => {
+    return innovations.filter(
+      item =>
+        (item.profileId && item.profileId === profile.id) ||
+        (profile.innovationIds && profile.innovationIds.includes(item.id)) ||
+        (item.innovatorName && item.innovatorName.toLowerCase().trim() === profile.fullName.toLowerCase().trim()) ||
+        (profile.phone && item.innovatorPhone && item.innovatorPhone.replace(/\D/g, '') === profile.phone.replace(/\D/g, ''))
+    );
+  };
+
   const addInnovation = async (item: Omit<Innovation, 'id' | 'submissionDate'>): Promise<Innovation> => {
-    const newId = `IG-2026-00${1025 + Math.floor(Math.random() * 9000)}`;
+    const newId = `KHJ-2026-00${1025 + Math.floor(Math.random() * 9000)}`;
     const today = new Date().toISOString().split('T')[0];
 
     const newRecord: Innovation = {
       ...item,
       id: newId,
       submissionDate: today,
+      profileId: item.profileId || currentProfile?.id
     };
 
+    if (currentProfile) {
+      // Link to current user profile
+      updateProfile(currentProfile.id, {
+        innovationIds: [...(currentProfile.innovationIds || []), newId]
+      });
+    }
+
     if (!isOnline) {
-      // Save offline draft
       const updatedDrafts = [...offlineDrafts, newRecord];
       setOfflineDrafts(updatedDrafts);
-      localStorage.setItem('innovategram_offline_drafts', JSON.stringify(updatedDrafts));
+      localStorage.setItem('khoj_offline_drafts', JSON.stringify(updatedDrafts));
       return newRecord;
     }
 
     const updated = [newRecord, ...innovations];
     setInnovations(updated);
 
-    // Persist custom creations in localStorage
     if (typeof window !== 'undefined') {
       const customOnes = updated.filter(inv => !initialInnovations.some(init => init.id === inv.id));
-      localStorage.setItem('innovategram_custom_innovations', JSON.stringify(customOnes));
+      localStorage.setItem('khoj_custom_innovations', JSON.stringify(customOnes));
     }
 
     return newRecord;
@@ -106,9 +215,9 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const updated = [...offlineDrafts, ...innovations];
     setInnovations(updated);
     setOfflineDrafts([]);
-    localStorage.removeItem('innovategram_offline_drafts');
+    localStorage.removeItem('khoj_offline_drafts');
     const customOnes = updated.filter(inv => !initialInnovations.some(init => init.id === inv.id));
-    localStorage.setItem('innovategram_custom_innovations', JSON.stringify(customOnes));
+    localStorage.setItem('khoj_custom_innovations', JSON.stringify(customOnes));
   };
 
   const updateInnovationStatus = (id: string, status: VerificationStatus, notes?: string, reviewer?: string) => {
@@ -143,7 +252,7 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setSavedIds(prev => {
       const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
       if (typeof window !== 'undefined') {
-        localStorage.setItem('innovategram_saved', JSON.stringify(next));
+        localStorage.setItem('khoj_saved', JSON.stringify(next));
       }
       return next;
     });
@@ -171,6 +280,13 @@ export const InnovationsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         connectionRequests,
         isOnline,
         offlineDraftsCount: offlineDrafts.length,
+        profiles,
+        currentProfile,
+        addProfile,
+        setCurrentProfile,
+        updateProfile,
+        loginWithPhone,
+        getInnovationsByProfile,
         addInnovation,
         updateInnovationStatus,
         updateInnovationAI,
@@ -192,4 +308,3 @@ export const useInnovations = () => {
   }
   return context;
 };
-

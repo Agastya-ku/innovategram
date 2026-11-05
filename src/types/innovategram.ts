@@ -24,9 +24,13 @@ export type Stage =
   | 'Scaled';
 
 export type VerificationStatus =
+  | 'Draft'
+  | 'Submitted'
   | 'Pending Review'
   | 'Under Review'
+  | 'Additional Information Required'
   | 'Verified'
+  | 'Not Verified'
   | 'Needs More Info'
   | 'Rejected';
 
@@ -46,8 +50,33 @@ export interface LocationInfo {
   isApproximate?: boolean;
 }
 
+export interface SocialLinks {
+  instagram?: string;
+  facebook?: string;
+  linkedin?: string;
+  youtube?: string;
+}
+
+export interface InnovatorProfile {
+  id: string; // e.g. KHJ-USR-001025
+  fullName: string;
+  phone: string;
+  phoneMasked: string;
+  phoneVerified: boolean;
+  state: string;
+  district: string;
+  villageOrTown: string;
+  lat?: number;
+  lng?: number;
+  profileVisibility: 'public' | 'private';
+  socialLinks?: SocialLinks;
+  createdAt: string;
+  innovationIds: string[];
+}
+
 export interface Innovation {
-  id: string; // e.g., IG-2026-001025
+  id: string; // e.g., KHJ-2026-001025
+  profileId?: string; // Links to InnovatorProfile
   title: Record<Language, string>;
   problem: Record<Language, string>;
   solution: Record<Language, string>;
@@ -122,4 +151,3 @@ export interface ConnectionRequest {
 export interface TranslationDictionary {
   [key: string]: Record<Language, string>;
 }
-

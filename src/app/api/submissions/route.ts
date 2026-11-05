@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newId = `IG-2026-00${1025 + Math.floor(Math.random() * 9000)}`;
+    const newId = `KHJ-2026-00${1025 + Math.floor(Math.random() * 9000)}`;
 
     const newRecord: Innovation = {
       ...body,

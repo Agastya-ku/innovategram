@@ -6,9 +6,9 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'InnovateGram | રાષ્ટ્રીય ગ્રામીણ આવિષ્કાર મંચ | AI Grassroots Innovation Platform',
+  title: 'KHOJ (खोज) | छोटा या बड़ा, हर आविष्कार पहचान का हकदार।',
   description:
-    'A trilingual (Gujarati, Hindi, English) platform connecting rural innovators, farmers, and grassroots inventors with incubators, government, and universities.',
+    'KHOJ — छोटा या बड़ा, हर आविष्कार पहचान का हकदार। A trilingual (Gujarati, Hindi, English) platform connecting grassroots inventors, farmers, and rural innovators with opportunities.',
 };
 
 export default function RootLayout({

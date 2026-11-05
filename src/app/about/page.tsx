@@ -30,7 +30,7 @@ export default function AboutPage() {
           Historically, the vast majority of these innovations remained undocumented and unacknowledged due to language hurdles, complex bureaucratic forms, lack of internet access, and digital literacy barriers.
         </p>
         <p>
-          <strong>InnovateGram</strong> changes this paradigm by turning the process upside down: the rural creator never has to adapt to complex forms or AI terminology. By using natural voice recordings in Hindi, Gujarati, or English, alongside photos or video clips, our AI converts unstructured submissions into standardized innovation dossiers, verifies them with institutional stakeholders, and protects innovator privacy.
+          <strong>KHOJ</strong> changes this paradigm by turning the process upside down: the rural creator never has to adapt to complex forms or AI terminology. By using natural voice recordings in Hindi, Gujarati, or English, alongside photos or video clips, our AI converts unstructured submissions into standardized innovation dossiers, verifies them with institutional stakeholders, and protects innovator privacy.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-emerald-900/10">

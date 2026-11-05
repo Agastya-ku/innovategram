@@ -2,13 +2,14 @@
 
 import React, { useState, useRef, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { useLanguage } from '@/context/LanguageContext';
 import { useInnovations } from '@/context/InnovationsContext';
-import { Sector, Stage, Innovation, MediaItem } from '@/types/innovategram';
+import { Sector, Stage, Innovation, MediaItem, InnovatorProfile } from '@/types/innovategram';
 import { AudioInstructionButton } from '@/components/AudioInstructionButton';
 import { ConversationalVoiceForm, ConversationalFormData } from '@/components/ConversationalVoiceForm';
+import { VoiceProfileForm } from '@/components/VoiceProfileForm';
 import {
   Mic,
   Square,
@@ -34,7 +35,11 @@ import {
   UserCheck,
   HeartHandshake,
   MessageSquare,
-  Printer
+  Printer,
+  UserPlus,
+  LogIn,
+  User,
+  Plus
 } from 'lucide-react';
 
 const INDIAN_STATES_DISTRICTS: Record<string, string[]> = {
@@ -50,22 +55,43 @@ const INDIAN_STATES_DISTRICTS: Record<string, string[]> = {
 
 function InnovatorPortalContent() {
   const { language, t, tSector, tStage } = useLanguage();
-  const { addInnovation } = useInnovations();
+  const { addInnovation, currentProfile, setCurrentProfile } = useInnovations();
   const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Search param mode: 'new' | 'login' | 'assisted'
+  const modeParam = searchParams.get('mode');
+  const pathwayParam = searchParams.get('pathway');
+
+  // Top level screen state: 'gate' | 'profile-create' | 'profile-ready' | 'innovation-form'
+  const [activeScreen, setActiveScreen] = useState<'gate' | 'profile-create' | 'profile-ready' | 'innovation-form'>(
+    modeParam === 'new'
+      ? 'profile-create'
+      : currentProfile
+      ? 'innovation-form'
+      : 'gate'
+  );
+
+  // Recently created profile in this session
+  const [justCreatedProfile, setJustCreatedProfile] = useState<InnovatorProfile | null>(null);
 
   // 1. Two Registration Pathways: 'self' | 'assisted'
-  const initialPathway = searchParams.get('pathway') === 'assisted' ? 'assisted' : 'self';
+  const initialPathway = pathwayParam === 'assisted' || modeParam === 'assisted' ? 'assisted' : 'self';
   const [pathway, setPathway] = useState<'self' | 'assisted'>(initialPathway);
 
   // Submitter / Helper fields for Option B (Assisted)
-  const [submitterName, setSubmitterName] = useState<string>('');
+  const [submitterName, setSubmitterName] = useState<string>(currentProfile?.fullName || '');
   const [submitterRelationship, setSubmitterRelationship] = useState<string>('Friend/Neighbor');
-  const [submitterPhone, setSubmitterPhone] = useState<string>('');
+  const [submitterPhone, setSubmitterPhone] = useState<string>(currentProfile?.phone || '');
   const [innovatorConsentGiven, setInnovatorConsentGiven] = useState<boolean>(true);
 
   // Actual Inventor fields
-  const [innovatorName, setInnovatorName] = useState<string>('');
-  const [innovatorPhone, setInnovatorPhone] = useState<string>('');
+  const [innovatorName, setInnovatorName] = useState<string>(
+    pathway === 'self' && currentProfile ? currentProfile.fullName : ''
+  );
+  const [innovatorPhone, setInnovatorPhone] = useState<string>(
+    pathway === 'self' && currentProfile ? currentProfile.phone : ''
+  );
 
   // Mode: 'direct' (one-tap voice) | 'conversational' (step-by-step Q&A)
   const [submissionMode, setSubmissionMode] = useState<'direct' | 'conversational'>('direct');
@@ -87,9 +113,9 @@ function InnovatorPortalContent() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   // Location state (Default to Gujarat)
-  const [state, setState] = useState<string>('Gujarat');
-  const [district, setDistrict] = useState<string>('Patan');
-  const [village, setVillage] = useState<string>('');
+  const [state, setState] = useState<string>(currentProfile?.state || 'Gujarat');
+  const [district, setDistrict] = useState<string>(currentProfile?.district || 'Patan');
+  const [village, setVillage] = useState<string>(currentProfile?.villageOrTown || '');
   const [gpsLoading, setGpsLoading] = useState<boolean>(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
 
@@ -113,6 +139,30 @@ function InnovatorPortalContent() {
     };
   }, []);
 
+  // Update fields when currentProfile changes
+  useEffect(() => {
+    if (currentProfile && pathway === 'self') {
+      setInnovatorName(currentProfile.fullName);
+      setInnovatorPhone(currentProfile.phone);
+      setState(currentProfile.state);
+      setDistrict(currentProfile.district);
+      setVillage(currentProfile.villageOrTown);
+    }
+  }, [currentProfile, pathway]);
+
+  // Handle successful profile creation
+  const handleProfileCreated = (newProfile: InnovatorProfile) => {
+    setJustCreatedProfile(newProfile);
+    setCurrentProfile(newProfile);
+    setActiveScreen('profile-ready');
+    // Pre-populate innovator fields
+    setInnovatorName(newProfile.fullName);
+    setInnovatorPhone(newProfile.phone);
+    setState(newProfile.state);
+    setDistrict(newProfile.district);
+    setVillage(newProfile.villageOrTown);
+  };
+
   // Web Audio / MediaRecorder Handler
   const startRecording = async () => {
     try {
@@ -122,73 +172,72 @@ function InnovatorPortalContent() {
         audioChunksRef.current = [];
 
         mediaRecorderRef.current.ondataavailable = e => {
-          if (e.data.size > 0) {
-            audioChunksRef.current.push(e.data);
-          }
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
         };
 
         mediaRecorderRef.current.onstop = () => {
-          const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const url = URL.createObjectURL(blob);
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const url = URL.createObjectURL(audioBlob);
           setAudioBlobUrl(url);
-          if (!audioTranscript) {
-            if (language === 'gu') {
-              setAudioTranscript('મેં ખેતરમાં ઓછા ખર્ચે નિંદામણ દૂર કરવા માટે દેશી સાઇકલના પુર્જામાંથી હાથથી ચાલતું મશીન બનાવ્યું છે જે બહુ સરળતાથી ચાલે છે અને મજૂરી ખર્ચ ઘટાડે છે.');
-            } else if (language === 'hi') {
-              setAudioTranscript('मैंने खेतों के लिए एक कम लागत वाला यंत्र बनाया है जो बिना बिजली के फसलों से खरपतवार साफ करता है और शारीरिक श्रम बचाता है।');
-            } else {
-              setAudioTranscript('I built a low-cost manually propelled farm tool made from recycled bicycle parts to remove weeds without petrol or electricity.');
-            }
-          }
+          // Multilingual sample transcripts
+          const defaultTranscript =
+            language === 'gu'
+              ? 'મેં ખેતરોમાં નિંદામણ દૂર કરવા માટે જૂની સાઇકલના વ્હીલ અને ચેઇનમાંથી એક સરળ હાથથી ચાલતું મશીન બનાવ્યું છે. આ મશીનથી એક જ દિવસમાં આખો એકર ખેતર સાફ થઈ જાય છે અને મજૂરી ખર્ચ બચે છે.'
+              : language === 'hi'
+              ? 'मैंने खेतों से खरपतवार निकालने के लिए पुरानी साइकिल के पहिए और लोहे के टुकड़ों से हाथ से चलने वाली मशीन बनाई है। इससे मजदूरी बचती है और बिना बिजली या ईंधन के काम होता है।'
+              : 'I have fabricated a hand-pushed wheeled weed removal implement using recycled bicycle sprockets and scrap metal. It eliminates chemical herbicides and cuts labor days.';
+          setAudioTranscript(defaultTranscript);
         };
 
         mediaRecorderRef.current.start();
+        setIsRecording(true);
+        setRecordingSeconds(0);
+        timerRef.current = setInterval(() => {
+          setRecordingSeconds(s => s + 1);
+        }, 1000);
+      } else {
+        simulateVoiceRecording();
       }
     } catch (err) {
       console.warn('Microphone permission not granted or simulated', err);
-      setAudioBlobUrl('https://actions.google.com/sounds/v1/ambiences/outdoor_ambience.ogg');
-      if (language === 'gu') {
-        setAudioTranscript('મેં ખેતરમાં નિંદામણ દૂર કરવા માટે દેશી જુગાડથી મશીન બનાવ્યું છે જે શારીરિક મહેનત બચાવે છે.');
-      } else if (language === 'hi') {
-        setAudioTranscript('मैंने खेतों के लिए एक कम लागत वाला यंत्र बनाया है जो फसलों से खरपतवार साफ करता है।');
-      } else {
-        setAudioTranscript('I developed a low-cost farm implement that cuts manual labor for weeding in cotton fields.');
-      }
+      simulateVoiceRecording();
     }
+  };
 
+  const simulateVoiceRecording = () => {
     setIsRecording(true);
     setRecordingSeconds(0);
-    setStep('recording');
-
     timerRef.current = setInterval(() => {
-      setRecordingSeconds(prev => prev + 1);
+      setRecordingSeconds(s => s + 1);
     }, 1000);
   };
 
   const stopRecording = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsRecording(false);
+
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    } else {
+      setAudioBlobUrl('https://actions.google.com/sounds/v1/ambiences/outdoor_ambience.ogg');
+      setAudioTranscript(
+        language === 'gu'
+          ? 'મેં ખેતરોમાં નિંદામણ દૂર કરવા માટે જૂની સાઇકલના વ્હીલ અને ચેઇનમાંથી એક સરળ હાથથી ચાલતું મશીન બનાવ્યું છે. આ મશીનથી એક જ દિવસમાં આખો એકર ખેતર સાફ થઈ જાય છે અને મજૂરી ખર્ચ બચે છે.'
+          : language === 'hi'
+          ? 'मैंने खेतों से खरपतवार निकालने के लिए पुरानी साइकिल के पहिए और लोहे के टुकड़ों से हाथ से चलने वाली मशीन बनाई है। इससे मजदूरी बचती है और बिना बिजली या ईंधन के काम होता है।'
+          : 'I have fabricated a hand-pushed wheeled weed removal implement using recycled bicycle sprockets and scrap metal. It eliminates chemical herbicides and cuts labor days.'
+      );
     }
   };
 
-  const resetRecording = () => {
-    stopRecording();
-    setAudioBlobUrl(null);
-    setAudioTranscript('');
-    setRecordingSeconds(0);
-    startRecording();
-  };
-
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newUrls: string[] = [];
+    if (e.target.files) {
+      const urls: string[] = [];
       Array.from(e.target.files).forEach(file => {
-        newUrls.push(URL.createObjectURL(file));
+        urls.push(URL.createObjectURL(file));
       });
-      setPhotos(prev => [...prev, ...newUrls]);
+      setPhotos(prev => [...prev, ...urls]);
     }
   };
 
@@ -198,732 +247,769 @@ function InnovatorPortalContent() {
     }
   };
 
-  const handleGetLocation = () => {
-    setGpsLoading(true);
-    setGpsError(null);
+  const detectGPSLocation = () => {
     if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your browser. Please select state and district manually below.');
-      setGpsLoading(false);
+      setGpsError(language === 'gu' ? 'તમારા બ્રાઉઝરમાં જીપીએસ ઉપલબ્ધ નથી' : language === 'hi' ? 'जीपीएस उपलब्ध नहीं है' : 'GPS not available in browser');
       return;
     }
+    setGpsLoading(true);
+    setGpsError(null);
     navigator.geolocation.getCurrentPosition(
       pos => {
         setGpsLoading(false);
         setState('Gujarat');
         setDistrict('Patan');
-        setVillage(language === 'gu' ? 'રાધનપુર ગ્રામીણ' : language === 'hi' ? 'राधनपुर ग्रामीण' : 'Radhanpur Rural');
+        setVillage(village || 'Radhanpur');
       },
       err => {
         setGpsLoading(false);
-        setGpsError('Could not obtain GPS coordinates. Please select your State and District manually below.');
+        setState('Gujarat');
+        setDistrict('Ahmedabad');
+        setVillage(village || 'Sanand');
       },
-      { timeout: 6000 }
+      { timeout: 5000 }
     );
   };
 
-  // AI Pipeline Execution
-  const processSubmissionWithAI = async () => {
+  // Conversational Voice Q&A Completion Handler
+  const handleConversationalComplete = (formData: ConversationalFormData) => {
+    if (formData.innovatorName) setInnovatorName(formData.innovatorName);
+    if (formData.village) setVillage(formData.village);
+    if (formData.state) setState(formData.state);
+    if (formData.district) setDistrict(formData.district);
+
+    const generatedTranscript = `${formData.title || ''}. ${formData.problem || ''}. ${formData.solution || ''}`;
+    setAudioTranscript(generatedTranscript);
+
+    processAIClassification(generatedTranscript, formData);
+  };
+
+  // AI Classification Pipeline
+  const processAIClassification = async (transcriptText: string, extraData?: any) => {
     setAiProcessing(true);
     setStep('ai-review');
 
     try {
-      const fallbackTranscript =
-        language === 'gu'
-          ? 'મેં ખેતી માટે નીંદણ કાઢવાનું દેશી સાઇકલ આધારિત મશીન બનાવ્યું છે.'
-          : language === 'hi'
-          ? 'मैंने खेतों के लिए खरपतवार हटाने वाली मशीन बनाई है।'
-          : 'I have created a bicycle-based weeding machine for farming.';
       const res = await fetch('/api/ai-classify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          transcript: audioTranscript || fallbackTranscript,
+          transcript: transcriptText,
           language,
+          title: extraData?.title,
+          problem: extraData?.problem,
+          solution: extraData?.solution,
           village
         })
       });
+
       const json = await res.json();
-      if (json.success && json.data) {
-        setAiTitle(json.data.extractedTitle);
-        setAiProblem(json.data.extractedProblem);
-        setAiSolution(json.data.extractedSolution);
-        setAiSector(json.data.sector);
-        setAiStage(json.data.stage);
-        setAiConfidence(json.data.confidenceScore || 95);
-        setAiProcessing(false);
-        return;
+      if (json.success && json.classification) {
+        const c = json.classification;
+        setAiTitle(c.title);
+        setAiProblem(c.problem);
+        setAiSolution(c.solution);
+        setAiSector(c.sector || 'Agriculture');
+        setAiStage(c.stage || 'Tested');
+        setAiConfidence(c.confidenceScore || 94);
       }
     } catch (e) {
-      console.warn('API classify fallback', e);
-    }
-
-    // High quality client fallback
-    setTimeout(() => {
-      let titleGu = 'ઓછા ખર્ચે હાથથી ચાલતું ખેતી સાધન';
-      let titleHi = 'कम लागत वाला हस्तचालित कृषि उपकरण';
-      let titleEn = 'Low-Cost Manual Agro Weeder Machine';
-
-      let probGu = 'ચોમાસામાં ખેતરમાં નીંદણ કાઢવામાં બહુ મહેનત પડે છે અને મોંઘા મજૂરો મળતા નથી.';
-      let probHi = 'वर्षा ऋतु में खेतों से खरपतवार निकालना बहुत थकाऊ होता है और महंगे मजदूरों की भारी कमी रहती है।';
-      let probEn = 'Manual weeding in rural farmland is backbreaking and requires unaffordable hired labor during monsoon.';
-
-      let solGu = 'સાઇકલના જૂના પાર્ટ્સમાંથી બનેલું પૈડાંવાળું સાધન, જેમાં સરળતાથી બદલી શકાય તેવા બ્લેડ છે.';
-      let solHi = 'साइकिल के पुराने कलपुर्जों से बना पहिएदार हल्का यंत्र, जिसमें आसानी से बदले जा सकने वाले ब्लेड लगे हैं।';
-      let solEn = 'A lightweight wheel-assisted device fabricated from recycled cycle parts with interchangeable scraping blades.';
-
-      const tLow = (audioTranscript || '').toLowerCase();
-      if (tLow.includes('પાણી') || tLow.includes('water') || tLow.includes('સિંચાઈ') || tLow.includes('सिंचाई')) {
-        titleGu = 'સ્માર્ટ પાણી બચાવ અને ડ્રિપ પ્રણાલી';
-        titleHi = 'स्मार्ट जल संरक्षण एवं ड्रिप प्रणाली';
-        titleEn = 'Smart Water Conservation & Drip Module';
-        setAiSector('Water and Sanitation');
-      } else if (tLow.includes('સોલાર') || tLow.includes('solar') || tLow.includes('ઊર્જા') || tLow.includes('सौर')) {
-        titleGu = 'ઑફ-ગ્રીડ સોલાર પાવર યુનિટ';
-        titleHi = 'ऑफ-ग्रिड सौर ऊर्जा इकाई';
-        titleEn = 'Off-Grid Renewable Solar Unit';
-        setAiSector('Renewable Energy');
-      } else {
-        setAiSector('Agriculture');
-      }
-
-      setAiTitle({ en: titleEn, hi: titleHi, gu: titleGu });
-      setAiProblem({ en: probEn, hi: probHi, gu: probGu });
-      setAiSolution({ en: solEn, hi: solHi, gu: solGu });
-      setAiStage('Prototype');
-      setAiConfidence(95);
+      // Fallback
+      setAiTitle({
+        en: 'Low-Cost Grassroots Utility Innovation',
+        hi: 'कम लागत वाला ग्रामीण देसी नवाचार',
+        gu: 'ઓછા ખર્ચે તૈયાર કરેલ દેશી સાધન'
+      });
+      setAiProblem({
+        en: 'Manual labor intensive and high maintenance rural challenge.',
+        hi: 'शारीरिक श्रम एवं उच्च खर्च वाली ग्रामीण समस्या।',
+        gu: 'વધુ શારીરિક શ્રમ અને ઊંચા ખર્ચની પાયાની ગ્રામીણ મુશ્કેલી.'
+      });
+      setAiSolution({
+        en: 'Locally fabricated mechanical tool utilizing scrap materials.',
+        hi: 'कबाड़ से तैयार सरल यांत्रिक समाधान।',
+        gu: 'સ્થાનિક ઉપલબ્ધ સાધન સામગ્રીમાંથી બનાવેલ દેશી મશીન.'
+      });
+      setAiSector('Agriculture');
+      setAiStage('Tested');
+    } finally {
       setAiProcessing(false);
-    }, 1200);
-  };
-
-  // Conversational Form completion bridge
-  const handleConversationalComplete = (cData: ConversationalFormData) => {
-    setInnovatorName(cData.innovatorName);
-    setAiTitle({
-      gu: cData.title,
-      hi: cData.title,
-      en: cData.title
-    });
-    setAiProblem({
-      gu: cData.problem,
-      hi: cData.problem,
-      en: cData.problem
-    });
-    setAiSolution({
-      gu: cData.solution,
-      hi: cData.solution,
-      en: cData.solution
-    });
-    setVillage(cData.village);
-    setDistrict(cData.district || 'Patan');
-    setState(cData.state || 'Gujarat');
-    setAiSector(cData.sector || 'Agriculture');
-    setAiStage(cData.stage || 'Prototype');
-    setAudioTranscript(cData.rawVoiceTranscript);
-    setSubmissionMode('direct');
-    setStep('ai-review');
+    }
   };
 
   const handleFinalSubmit = async () => {
     setSubmitting(true);
 
     const mediaItems: MediaItem[] = [];
-    if (photos.length > 0) {
-      photos.forEach((url, idx) => {
-        mediaItems.push({ id: `p-${idx}`, type: 'photo', url, caption: 'Innovator uploaded prototype photo' });
-      });
-    } else {
+    photos.forEach((url, i) => {
       mediaItems.push({
-        id: 'p-def',
+        id: `m-photo-${i}`,
+        type: 'photo',
+        url: url || 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80',
+        caption: `${aiTitle[language] || aiTitle.en} - Photograph ${i + 1}`
+      });
+    });
+
+    if (mediaItems.length === 0) {
+      mediaItems.push({
+        id: 'm-photo-default',
         type: 'photo',
         url: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80',
-        caption: 'Grassroots working prototype photograph'
+        caption: `${aiTitle[language] || aiTitle.en} - Field testing`
       });
     }
 
     if (videoUrl) {
-      mediaItems.push({ id: 'v-1', type: 'video', url: videoUrl, caption: 'Working demonstration video clip' });
+      mediaItems.push({
+        id: 'm-video-1',
+        type: 'video',
+        url: videoUrl,
+        caption: 'Field operation demonstration'
+      });
     }
 
-    const newInnovation = await addInnovation({
-      title: aiTitle as any,
-      problem: aiProblem as any,
-      solution: aiSolution as any,
+    const payload = {
+      profileId: currentProfile?.id,
+      title: aiTitle,
+      problem: aiProblem,
+      solution: aiSolution,
       originalLanguage: language,
-      originalTranscript: audioTranscript || 'Voice submission recorded by rural innovator.',
+      originalTranscript: audioTranscript || 'Voice recorded submission',
       audioUrl: audioBlobUrl || undefined,
       media: mediaItems,
       sector: aiSector,
+      subsector: 'Farm Implements & Rural Machinery',
       stage: aiStage,
-      status: 'Pending Review',
-      registrationType: pathway,
-      submitterName: pathway === 'assisted' ? (submitterName || (language === 'gu' ? 'સહાયક સ્વયંસેવક' : language === 'hi' ? 'सहायक स्वयंसेवक' : 'Community Volunteer')) : undefined,
-      submitterRelationship: pathway === 'assisted' ? submitterRelationship : undefined,
-      submitterPhoneMasked: pathway === 'assisted' && submitterPhone ? `${submitterPhone.slice(0, 5)} •••••` : undefined,
-      innovatorConsentGiven: pathway === 'assisted' ? innovatorConsentGiven : true,
+      status: 'Pending Review' as const,
       location: {
-        state,
-        district,
-        villageOrTown: village || (language === 'gu' ? 'ગામ પંચાયત વિસ્તાર' : language === 'hi' ? 'ग्राम पंचायत क्षेत्र' : 'Village/Panchayat Area'),
-        lat: state === 'Gujarat' ? 23.8343 : 26.9124,
-        lng: state === 'Gujarat' ? 71.6033 : 75.7873,
+        state: state || 'Gujarat',
+        district: district || 'Patan',
+        villageOrTown: village || 'Radhanpur',
+        lat: 23.8344,
+        lng: 71.6044,
         isApproximate: true
       },
-      innovatorName: innovatorName || (pathway === 'assisted' ? (language === 'gu' ? 'ગ્રામીણ શોધક' : language === 'hi' ? 'ग्रामीण खोजकर्ता' : 'Rural Innovator') : (language === 'gu' ? 'પાયાના આવિષ્કારક' : language === 'hi' ? 'जमीनी आविष्कारक' : 'Grassroots Innovator')),
+      registrationType: pathway,
+      submitterName: pathway === 'assisted' ? submitterName : undefined,
+      submitterRelationship: pathway === 'assisted' ? submitterRelationship : undefined,
+      submitterPhoneMasked: pathway === 'assisted' ? '+91 98250 •••••' : undefined,
+      innovatorConsentGiven: pathway === 'assisted' ? innovatorConsentGiven : true,
+      innovatorName: innovatorName || (language === 'gu' ? 'ગ્રામીણ શોધક' : language === 'hi' ? 'ग्रामीण आविष्कारक' : 'Rural Innovator'),
       innovatorContactProtected: true,
-      innovatorPhoneMasked: innovatorPhone ? `${innovatorPhone.slice(0, 5)} •••••` : '+91 94273 •••••',
-      innovatorPhone: innovatorPhone || '+91 94273 12345',
-      submissionType: audioBlobUrl && photos.length > 0 ? 'combined' : audioBlobUrl ? 'voice' : 'photo',
+      innovatorPhoneMasked: innovatorPhone ? `+91 ${innovatorPhone.slice(0, 5)} •••••` : '+91 98290 •••••',
+      innovatorPhone: innovatorPhone || '+91 98290 41289',
+      submissionType: (audioBlobUrl && photos.length ? 'combined' : audioBlobUrl ? 'voice' : 'text') as any,
       aiConfidenceScore: aiConfidence,
-      keywords: [aiSector.toLowerCase(), 'grassroots', 'rural', 'gujarat'],
-      potentialApplications: ['Rural livelihood enhancement', 'Agricultural productivity'],
+      keywords: ['grassroots', 'rural', aiSector.toLowerCase(), 'low cost'],
+      potentialApplications: ['Rural households', 'Smallholder farms', 'Community cooperatives'],
       isSampleData: false
-    });
-
-    setSubmittedInnovation(newInnovation);
-    setSubmitting(false);
-    setStep('success');
+    };
 
     try {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {}
+      const created = await addInnovation(payload);
+      setSubmittedInnovation(created);
+      setStep('success');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    } catch (err) {
+      console.error('Submission failed', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  // =========================================================================
+  // SCREEN 1: WELCOME GATE (REQUIREMENT 4: NEW USER vs EXISTING USER)
+  // =========================================================================
+  if (activeScreen === 'gate') {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 space-y-8 animate-in fade-in">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-[#104C35] px-3.5 py-1 rounded-full text-xs font-bold border border-emerald-300">
+            <Sparkles className="w-4 h-4 text-amber-600" />
+            <span>KHOJ (खोज) • {t('portalInnovator')}</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#104C35] font-serif">
+            {t('welcomeBackQuestion')}
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6B756E] max-w-md mx-auto">
+            {language === 'gu'
+              ? 'ખોજમાં આપનું સ્વાગત છે. શું તમે અગાઉ પ્રોફાઇલ બનાવેલ છે કે પ્રથમ વાર આવ્યા છો?'
+              : language === 'hi'
+              ? 'KHOJ में आपका स्वागत है। क्या आपने पहले पंजीकरण किया है या आप पहली बार आए हैं?'
+              : 'Welcome to KHOJ. Please tell us if you have registered before or are new.'}
+          </p>
+        </div>
+
+        {/* TWO LARGE VISUAL CARDS (REQUIREMENT 4) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* OPTION 1: NEW USER */}
+          <button
+            type="button"
+            onClick={() => setActiveScreen('profile-create')}
+            className="p-8 rounded-3xl border-2 border-emerald-800/30 hover:border-[#104C35] bg-white hover:bg-emerald-50/60 text-left transition-all group flex flex-col justify-between space-y-5 shadow-sm hover:shadow-md cursor-pointer"
+          >
+            <div className="space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-[#104C35] text-white flex items-center justify-center shadow-md">
+                <UserPlus className="w-7 h-7 text-amber-300" />
+              </div>
+              <h2 className="text-lg font-bold text-[#104C35] group-hover:text-emerald-900">
+                {t('newUserOption')}
+              </h2>
+              <p className="text-xs text-[#18251E] font-medium leading-relaxed">
+                {t('newUserOptionDesc')}
+              </p>
+              <div className="text-[11px] text-[#6B756E] pt-1 border-t border-gray-100">
+                {language === 'gu'
+                  ? 'સરળ વોઇસ-સહાયિત પ્રોફાઇલ (૦% કાગળિયા).'
+                  : language === 'hi'
+                  ? 'सरल आवाज़-सहायित प्रोफ़ाइल (0% कागजी कार्रवाई)।'
+                  : 'Voice-assisted profile creation in simple steps.'}
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#104C35] pt-2">
+              <span>{t('createProfileHeading')}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+
+          {/* OPTION 2: EXISTING USER */}
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard')}
+            className="p-8 rounded-3xl border-2 border-amber-600/30 hover:border-amber-600 bg-white hover:bg-amber-50/60 text-left transition-all group flex flex-col justify-between space-y-5 shadow-sm hover:shadow-md cursor-pointer"
+          >
+            <div className="space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md">
+                <LogIn className="w-7 h-7" />
+              </div>
+              <h2 className="text-lg font-bold text-amber-950 group-hover:text-amber-800">
+                {t('existingUserOption')}
+              </h2>
+              <p className="text-xs text-amber-950 font-medium leading-relaxed">
+                {t('existingUserOptionDesc')}
+              </p>
+              <div className="text-[11px] text-[#6B756E] pt-1 border-t border-gray-100">
+                {language === 'gu'
+                  ? 'મોબાઇલ નંબર + OTP વડે અગાઉના આવિષ્કારો જુઓ.'
+                  : language === 'hi'
+                  ? 'मोबाइल नंबर + OTP से अपने पूर्व आविष्कार देखें।'
+                  : 'Log in with mobile OTP to manage innovations.'}
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-800 pt-2">
+              <span>{language === 'gu' ? 'લૉગ ઇન કરો' : language === 'hi' ? 'लॉग इन करें' : 'Log In'}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+        </div>
+
+        {/* Shortcut: Assisted Registration */}
+        <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-emerald-950">
+            <HeartHandshake className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>
+              {language === 'gu'
+                ? 'કોઈ ગ્રામીણ શોધક વતી સહાય કરી રહ્યા છો?'
+                : language === 'hi'
+                ? 'किसी ग्रामीण आविष्कारक की सहायता कर रहे हैं?'
+                : 'Helping someone else in your community submit?'}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setPathway('assisted');
+              setActiveScreen('innovation-form');
+            }}
+            className="text-[#104C35] font-bold hover:underline shrink-0 cursor-pointer"
+          >
+            {t('registerOnBehalf')} →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // SCREEN 2: VOICE-ASSISTED PROFILE CREATION (REQUIREMENT 5 & 6)
+  // =========================================================================
+  if (activeScreen === 'profile-create') {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <VoiceProfileForm
+          onProfileCreated={handleProfileCreated}
+          onCancel={() => setActiveScreen('gate')}
+        />
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // SCREEN 3: PROFILE READY CONFIRMATION (REQUIREMENT 7)
+  // =========================================================================
+  if (activeScreen === 'profile-ready') {
+    const profileToShow = justCreatedProfile || currentProfile;
+
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 space-y-8 animate-in fade-in">
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#104C35] mx-auto flex items-center justify-center shadow-inner">
+            <CheckCircle className="w-8 h-8 text-emerald-700" />
+          </div>
+          <h1 className="text-3xl font-extrabold text-[#104C35] font-serif">
+            {t('profileReadyHeading')}
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6B756E] max-w-md mx-auto">
+            {t('profileReadySubtitle')}
+          </p>
+        </div>
+
+        {/* Profile Card Summary */}
+        {profileToShow && (
+          <div className="bg-white p-6 rounded-3xl border-2 border-emerald-900/15 shadow-md space-y-4">
+            <div className="flex items-center justify-between border-b border-emerald-900/10 pb-3">
+              <span className="font-mono text-xs font-bold text-[#104C35] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg">
+                {profileToShow.id}
+              </span>
+              <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded">
+                {t('phoneVerifiedMsg')}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-[#6B756E] block">{t('profileFullName')}:</span>
+                <span className="font-bold text-[#18251E] text-sm">{profileToShow.fullName}</span>
+              </div>
+              <div>
+                <span className="text-[#6B756E] block">{t('profilePhone')}:</span>
+                <span className="font-bold text-[#18251E]">{profileToShow.phoneMasked}</span>
+              </div>
+              <div>
+                <span className="text-[#6B756E] block">{language === 'gu' ? 'સ્થળ:' : language === 'hi' ? 'स्थान:' : 'Location:'}</span>
+                <span className="font-bold text-[#18251E]">
+                  {profileToShow.villageOrTown}, {profileToShow.district}, {profileToShow.state}
+                </span>
+              </div>
+              <div>
+                <span className="text-[#6B756E] block">{t('profileVisibilityLabel')}:</span>
+                <span className="font-bold text-[#104C35] capitalize">
+                  {profileToShow.profileVisibility === 'public' ? t('profilePublic') : t('profilePrivate')}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Two Prominent Next Action Buttons (Requirement 7) */}
+        <div className="space-y-3">
+          {/* Primary: Self Innovation Registration */}
+          <button
+            onClick={() => {
+              setPathway('self');
+              setActiveScreen('innovation-form');
+            }}
+            className="w-full flex items-center justify-center gap-3 bg-[#104C35] hover:bg-[#176B45] text-white text-base font-bold p-5 rounded-2xl shadow-lg transition-all cursor-pointer"
+          >
+            <Plus className="w-5 h-5 text-amber-300" />
+            <span>+ {t('registerInnovationBtn')}</span>
+            <ArrowRight className="w-4 h-4 ml-auto" />
+          </button>
+
+          {/* Secondary: Assisted Innovation Registration */}
+          <button
+            onClick={() => {
+              setPathway('assisted');
+              setActiveScreen('innovation-form');
+            }}
+            className="w-full flex items-center justify-center gap-3 bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 text-amber-950 text-sm font-bold p-4 rounded-2xl transition-all cursor-pointer"
+          >
+            <HeartHandshake className="w-5 h-5 text-amber-700" />
+            <span>{t('registerOnBehalf')}</span>
+            <ArrowRight className="w-4 h-4 ml-auto text-amber-700" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // SCREEN 4: INNOVATION SUBMISSION FORM (REQUIREMENT 8, 9, 10)
+  // =========================================================================
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      {/* Top Header Card */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-emerald-900/10 shadow-xs">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-in fade-in">
+      {/* Top Banner with Logged in user info & mode switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-emerald-900/10 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#EAF5ED] text-[#176B45] flex items-center justify-center font-bold">
-            <Mic className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-[#104C35]">
+            <User className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-[#104C35]">{t('portalInnovator')}</h2>
-              <AudioInstructionButton
-                text={`${t('portalInnovator')}. ${t('innovatorWelcomeSubtitle')}`}
-                size="xs"
-              />
+              <span className="text-xs font-bold text-[#104C35]">
+                {currentProfile ? currentProfile.fullName : (language === 'gu' ? 'આવિષ્કારક પોર્ટલ' : language === 'hi' ? 'नवाचारकर्ता पोर्टल' : 'Innovator Portal')}
+              </span>
+              {currentProfile && (
+                <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.2 rounded">
+                  {currentProfile.id}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-[#6B756E]">{t('innovatorPortalTagline')}</p>
+            <p className="text-[11px] text-[#6B756E]">
+              {t('innovatorPortalTagline')}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
-            href="/innovator/my-innovations"
-            className="text-xs font-semibold text-[#176B45] bg-[#EAF5ED] hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+            href="/dashboard"
+            className="text-xs font-bold text-[#104C35] hover:underline px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50/60"
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>{t('myInnovationsBtn')}</span>
-          </Link>
-          <Link
-            href="/innovator/help"
-            className="text-xs text-[#6B756E] hover:text-[#176B45] p-2 rounded-xl border border-emerald-900/10"
-            title="Help & Voice Guide"
-          >
-            <HelpCircle className="w-4 h-4" />
+            {t('myDashboardHeading')} →
           </Link>
         </div>
       </div>
 
-      {/* CONVERSATIONAL MODE OVERLAY */}
-      {submissionMode === 'conversational' && (
-        <ConversationalVoiceForm
-          isAssisted={pathway === 'assisted'}
-          onComplete={handleConversationalComplete}
-          onCancel={() => setSubmissionMode('direct')}
-        />
+      {/* Pathway Switcher: Option A (Self) vs Option B (Assisted) */}
+      <div className="bg-white p-4 rounded-2xl border border-emerald-900/10 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#104C35]">
+          <span className="uppercase text-[#6B756E]">{t('pathwayTitle')}:</span>
+          <span className="bg-emerald-100 px-2 py-0.5 rounded text-emerald-900">
+            {pathway === 'self' ? t('pathwayOptionA_Title') : t('pathwayOptionB_Title')}
+          </span>
+        </div>
+
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => setPathway('self')}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              pathway === 'self'
+                ? 'bg-[#104C35] text-white shadow-xs'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {t('pathwayTabSelf')}
+          </button>
+          <button
+            onClick={() => setPathway('assisted')}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              pathway === 'assisted'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {t('pathwayTabAssisted')}
+          </button>
+        </div>
+      </div>
+
+      {/* OPTION B: ASSISTED SUBMISSION BANNER & FIELDS */}
+      {pathway === 'assisted' && (
+        <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-6 space-y-4 animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0">
+              <HeartHandshake className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-amber-950">
+                {t('helperNotice')}
+              </h3>
+              <p className="text-[11px] text-amber-800">
+                {t('helperConsentBadge')}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-amber-200 text-xs">
+            <div className="space-y-1">
+              <label className="font-bold text-amber-950">
+                {t('fieldSubmitterName')} *
+              </label>
+              <input
+                type="text"
+                value={submitterName}
+                onChange={e => setSubmitterName(e.target.value)}
+                placeholder="e.g. Anand Sharma (Volunteer / NGO)"
+                className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs text-[#18251E]"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-amber-950">
+                {t('fieldSubmitterRole')} *
+              </label>
+              <select
+                value={submitterRelationship}
+                onChange={e => setSubmitterRelationship(e.target.value)}
+                className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs font-semibold"
+              >
+                <option value="Friend/Neighbor">{language === 'gu' ? 'મિત્ર / પાડોશી' : language === 'hi' ? 'मित्र / पड़ोसी' : 'Friend / Neighbor'}</option>
+                <option value="Family Member">{language === 'gu' ? 'પરિવારજન' : language === 'hi' ? 'परिवार का सदस्य' : 'Family Member'}</option>
+                <option value="Volunteer/NGO">{language === 'gu' ? 'સ્વયંસેવક / NGO' : language === 'hi' ? 'स्वयंसेवक / एनजीओ' : 'Volunteer / NGO'}</option>
+                <option value="Teacher/Student">{language === 'gu' ? 'શિક્ષક / વિદ્યાર્થી' : language === 'hi' ? 'शिक्षक / छात्र' : 'Teacher / Student'}</option>
+                <option value="Panchayat Representative">{language === 'gu' ? 'ગ્રામ પંચાયત પ્રતિનિધિ' : language === 'hi' ? 'पंचायत प्रतिनिधि' : 'Panchayat Representative'}</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-amber-950">
+                {t('fieldActualInventorName')}
+              </label>
+              <input
+                type="text"
+                value={innovatorName}
+                onChange={e => setInnovatorName(e.target.value)}
+                placeholder="e.g. Rameshwar Lal Jat"
+                className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs text-[#18251E]"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-amber-950">
+                {t('fieldOptionalContact')}
+              </label>
+              <input
+                type="tel"
+                value={submitterPhone}
+                onChange={e => setSubmitterPhone(e.target.value)}
+                placeholder="Optional Phone Number"
+                className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs text-[#18251E]"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-start gap-2.5 text-xs text-amber-950">
+            <input
+              type="checkbox"
+              id="consent"
+              checked={innovatorConsentGiven}
+              onChange={e => setInnovatorConsentGiven(e.target.checked)}
+              className="mt-0.5 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+            />
+            <label htmlFor="consent" className="cursor-pointer font-medium leading-relaxed">
+              {t('fieldConsentCheckbox')}
+            </label>
+          </div>
+        </div>
       )}
 
-      {/* DIRECT SUBMISSION FLOW */}
-      {submissionMode === 'direct' && (
+      {/* SUBMISSION WORKFLOW MODES */}
+      {submissionMode === 'conversational' ? (
+        <ConversationalVoiceForm
+          onComplete={handleConversationalComplete}
+          onCancel={() => setSubmissionMode('direct')}
+          isAssisted={pathway === 'assisted'}
+        />
+      ) : (
         <>
-          {/* TWO PATHWAYS TOGGLE CARD (REQUIREMENT 3: OPTION A vs OPTION B) */}
+          {/* STEP: INTRO & RECORDING */}
           {step === 'intro' && (
-            <div className="bg-white rounded-3xl p-6 border border-emerald-900/10 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-[#176B45] uppercase tracking-wider">
-                    {t('pathwayTitle')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-[#104C35]">
-                      {pathway === 'self' ? t('pathwayOptionA_Title') : t('pathwayOptionB_Title')}
-                    </p>
-                    <AudioInstructionButton
-                      text={pathway === 'self' ? t('pathwayOptionA_Desc') : t('pathwayOptionB_Desc')}
-                      size="xs"
-                    />
-                  </div>
-                </div>
-
-                {/* Pathway Switch Tabs */}
-                <div className="flex items-center bg-gray-100 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setPathway('self')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      pathway === 'self'
-                        ? 'bg-[#176B45] text-white shadow-xs'
-                        : 'text-[#6B756E] hover:text-[#18251E]'
-                    }`}
-                  >
-                    {t('pathwayTabSelf')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPathway('assisted')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      pathway === 'assisted'
-                        ? 'bg-amber-600 text-white shadow-xs'
-                        : 'text-[#6B756E] hover:text-[#18251E]'
-                    }`}
-                  >
-                    {t('pathwayTabAssisted')}
-                  </button>
-                </div>
-              </div>
-
-              {/* Assisted Pathway (Option B) Submitter Fields */}
-              {pathway === 'assisted' && (
-                <div className="p-5 bg-amber-50/80 border border-amber-200 rounded-2xl space-y-4 text-xs text-amber-950 animate-in fade-in">
-                  <div className="flex items-center gap-2 font-bold text-amber-900 border-b border-amber-200/80 pb-2">
-                    <HeartHandshake className="w-4 h-4 text-amber-700 shrink-0" />
-                    <span>{t('helperNotice')}</span>
-                    <AudioInstructionButton text={t('helperNotice')} size="xs" />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div>
-                      <label className="block font-bold text-[#18251E] mb-1">
-                        {t('fieldSubmitterName')}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={language === 'gu' ? 'દા.ત. અજય વર્મા (સ્વયંસેવક/શિક્ષક)' : language === 'hi' ? 'उदा. अजय वर्मा (स्वयंसेवक/शिक्षक)' : 'e.g. Ajay Verma (Volunteer/Teacher)'}
-                        value={submitterName}
-                        onChange={e => setSubmitterName(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#18251E] mb-1">
-                        {t('fieldSubmitterRole')}
-                      </label>
-                      <select
-                        value={submitterRelationship}
-                        onChange={e => setSubmitterRelationship(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
-                      >
-                        <option value="Friend/Neighbor">{language === 'gu' ? 'ગામના મિત્ર / પડોશી' : language === 'hi' ? 'गांव के मित्र / पड़ोसी' : 'Friend / Neighbor'}</option>
-                        <option value="Family Member">{language === 'gu' ? 'પરિવારના સભ્ય' : language === 'hi' ? 'परिवार के सदस्य' : 'Family Member'}</option>
-                        <option value="Volunteer/NGO">{language === 'gu' ? 'NGO કાર્યકર્તા / સ્વયંસેવક' : language === 'hi' ? 'एनजीओ कार्यकर्ता / स्वयंसेवक' : 'Volunteer / NGO Worker'}</option>
-                        <option value="Teacher/Mentor">{language === 'gu' ? 'શિક્ષક / પ્રોફેસર' : language === 'hi' ? 'शिक्षक / प्रोफेसर' : 'Teacher / Mentor'}</option>
-                        <option value="Panchayat Representative">{language === 'gu' ? 'ગામ પંચાયત પ્રતિનિધિ' : language === 'hi' ? 'ग्राम पंचायत प्रतिनिधि' : 'Panchayat Representative'}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block font-bold text-[#18251E] mb-1">
-                        {t('fieldActualInventorName')}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={language === 'gu' ? 'મૂળ શોધકનું પૂરું નામ' : language === 'hi' ? 'मूल आविष्कारक का पूरा नाम' : "Actual Inventor's Full Name"}
-                        value={innovatorName}
-                        onChange={e => setInnovatorName(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#18251E] mb-1">
-                        {t('fieldOptionalContact')}
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="+91 98765 •••••"
-                        value={submitterPhone}
-                        onChange={e => setSubmitterPhone(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Explicit Inventor Consent Checkbox */}
-                  <label className="flex items-start gap-2.5 pt-1 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={innovatorConsentGiven}
-                      onChange={e => setInnovatorConsentGiven(e.target.checked)}
-                      className="mt-0.5 rounded text-[#176B45] focus:ring-[#176B45]"
-                    />
-                    <span className="text-[11px] font-semibold text-amber-900 leading-tight">
-                      {t('fieldConsentCheckbox')}
-                    </span>
-                  </label>
-
-                  <div className="text-[11px] text-[#6B756E] pt-1">
-                    {t('noDocumentsRequiredNote')}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STEP 1: INTRO & TWO SUBMISSION METHODS */}
-          {step === 'intro' && (
-            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm text-center space-y-8">
-              <div className="space-y-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#176B45] bg-emerald-100/70 px-3 py-1 rounded-full">
-                  {t('innovatorPortalBadge')}
-                </span>
-                <div className="flex items-center justify-center gap-2">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-[#104C35] font-serif leading-tight">
-                    {t('innovatorWelcomeTitle')}
-                  </h1>
-                  <AudioInstructionButton
-                    text={t('voiceInstructionSubmission')}
-                    size="sm"
-                  />
-                </div>
-                <p className="text-sm sm:text-base text-[#18251E]/85 max-w-lg mx-auto leading-relaxed">
-                  {t('voiceInstructionSubmission')}
-                </p>
-              </div>
-
-              {/* TWO INTERACTION METHODS: Prominent Mic vs Conversational Q&A */}
-              <div className="py-2 flex flex-col sm:flex-row items-center justify-center gap-6">
-                {/* Method 1: Big Microphone Button (One-tap full recording) */}
-                <div className="space-y-3">
-                  <button
-                    onClick={startRecording}
-                    className="relative group w-36 h-36 sm:w-44 sm:h-44 mx-auto rounded-full bg-gradient-to-tr from-[#104C35] via-[#176B45] to-emerald-500 flex flex-col items-center justify-center text-white shadow-2xl shadow-emerald-900/30 transform hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <div className="absolute inset-0 rounded-full border-4 border-emerald-400/30 animate-ping group-hover:border-emerald-300 pointer-events-none" />
-                    <Mic className="w-14 h-14 sm:w-16 sm:h-16 mb-1" />
-                    <span className="text-xs sm:text-sm font-bold tracking-wide">
-                      {t('voiceRecordBtn')}
-                    </span>
-                  </button>
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B756E]">
-                    <AudioInstructionButton text={t('voiceInstructionSubmission')} size="xs" />
-                    <span>{t('speakAllInOne')}</span>
-                  </div>
-                </div>
-
-                <div className="text-xs font-bold text-gray-400 uppercase">{t('orText')}</div>
-
-                {/* Method 2: Conversational Voice Q&A Assistant */}
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setSubmissionMode('conversational')}
-                    className="w-36 h-36 sm:w-44 sm:h-44 mx-auto rounded-full bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex flex-col items-center justify-center text-white shadow-2xl shadow-orange-900/25 transform hover:scale-105 active:scale-95 transition-all cursor-pointer p-4 text-center"
-                  >
-                    <MessageSquare className="w-12 h-12 mb-1" />
-                    <span className="text-xs sm:text-sm font-bold leading-tight">
-                      {t('conversationalOptionTitle')}
-                    </span>
-                  </button>
-                  <p className="text-xs text-[#6B756E] font-medium">
-                    {t('conversationalOptionDesc')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Alternate Media Upload Options */}
-              <div className="border-t border-emerald-900/10 pt-6">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <p className="text-xs font-semibold text-[#6B756E] uppercase tracking-wider">
-                    {t('orStartMedia')}
-                  </p>
-                  <AudioInstructionButton text={t('voiceInstructionPhoto')} size="xs" />
-                </div>
-                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                  <button
-                    onClick={() => setStep('media')}
-                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-emerald-900/20 bg-emerald-50/50 hover:bg-emerald-100/60 text-[#104C35] font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
-                  >
-                    <Camera className="w-4 h-4 text-[#176B45]" />
-                    <span>{t('photoUploadBtn')}</span>
-                  </button>
-                  <button
-                    onClick={() => setStep('media')}
-                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-emerald-900/20 bg-emerald-50/50 hover:bg-emerald-100/60 text-[#104C35] font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
-                  >
-                    <Video className="w-4 h-4 text-[#176B45]" />
-                    <span>{t('videoUploadBtn')}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: ACTIVE VOICE RECORDING INTERFACE */}
-          {step === 'recording' && (
             <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm text-center space-y-6">
-              <div className="space-y-2">
+              <div className="space-y-2 max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2">
-                  <h3 className="text-xl font-bold text-[#104C35]">
-                    {isRecording ? t('recordingActive') : t('voiceInstructions')}
-                  </h3>
-                  <AudioInstructionButton
-                    text={isRecording ? t('recordingActive') : t('voiceInstructionSubmission')}
-                    size="sm"
-                  />
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#104C35] font-serif">
+                    {t('innovatorWelcomeTitle')}
+                  </h2>
+                  <AudioInstructionButton text={t('innovatorWelcomeSubtitle')} size="sm" />
                 </div>
-                <p className="text-xs text-[#6B756E]">
-                  {t('voiceInstructionSubmission')}
+                <p className="text-xs sm:text-sm text-[#6B756E]">
+                  {t('innovatorWelcomeSubtitle')}
                 </p>
               </div>
 
-              {/* Animated Waveform & Timer */}
-              <div className="py-6 flex flex-col items-center justify-center">
-                <div className="h-20 flex items-center justify-center gap-1.5 px-8 bg-emerald-50 rounded-2xl border border-emerald-100 w-full max-w-md mb-4">
-                  {isRecording ? (
-                    <>
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-1" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-2" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-3" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-4" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-5" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-2" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-4" />
-                      <div className="w-2 bg-[#176B45] rounded-full animate-waveform-1" />
-                    </>
+              {/* TWO INTERACTIVE START OPTIONS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-4">
+                {/* 1. Direct Voice Recording Option */}
+                <div className="p-6 bg-gradient-to-b from-[#EAF5ED] to-white rounded-3xl border-2 border-emerald-900/15 flex flex-col items-center justify-between space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-[#104C35]">{t('voiceRecordBtn')}</p>
+                    <p className="text-[11px] text-[#6B756E]">{t('speakAllInOne')}</p>
+                  </div>
+
+                  {!isRecording ? (
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      className="w-24 h-24 rounded-full bg-[#104C35] hover:bg-[#176B45] text-white flex flex-col items-center justify-center shadow-xl shadow-emerald-900/20 transform hover:scale-105 transition-all cursor-pointer group"
+                    >
+                      <Mic className="w-8 h-8 text-amber-300 group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">{t('audioListen')}</span>
+                    </button>
                   ) : (
-                    <div className="text-xs text-emerald-800 font-medium">
-                      {language === 'gu'
-                        ? `ઓડિયો રેકોર્ડ પૂર્ણ: ${recordingSeconds} સેકન્ડ`
-                        : language === 'hi'
-                        ? `ऑडियो रिकॉर्ड पूरा: ${recordingSeconds} सेकंड`
-                        : `Audio recording complete: ${recordingSeconds}s`}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={stopRecording}
+                      className="w-24 h-24 rounded-full bg-red-600 hover:bg-red-700 text-white flex flex-col items-center justify-center shadow-xl animate-pulse cursor-pointer"
+                    >
+                      <Square className="w-8 h-8 text-white" />
+                      <span className="text-[10px] font-bold mt-1 font-mono">{recordingSeconds}s</span>
+                    </button>
                   )}
+
+                  <AudioInstructionButton text={t('voiceInstructions')} size="xs" />
                 </div>
 
-                <div className="text-2xl font-mono font-bold text-[#104C35]">
-                  00:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds}
-                </div>
-              </div>
+                {/* 2. Conversational Q&A Assistant Option */}
+                <div className="p-6 bg-gradient-to-b from-amber-50 to-white rounded-3xl border-2 border-amber-600/20 flex flex-col items-center justify-between space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-amber-950">{t('conversationalOptionTitle')}</p>
+                    <p className="text-[11px] text-[#6B756E]">{t('conversationalOptionDesc')}</p>
+                  </div>
 
-              {/* Audio Controls */}
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                {isRecording ? (
                   <button
-                    onClick={stopRecording}
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-colors cursor-pointer"
+                    type="button"
+                    onClick={() => setSubmissionMode('conversational')}
+                    className="w-24 h-24 rounded-full bg-amber-600 hover:bg-amber-700 text-white flex flex-col items-center justify-center shadow-xl shadow-amber-900/20 transform hover:scale-105 transition-all cursor-pointer"
                   >
-                    <Square className="w-4 h-4 fill-white" />
-                    <span>{t('stopRecording')}</span>
+                    <MessageSquare className="w-8 h-8" />
+                    <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Q&A</span>
                   </button>
-                ) : (
-                  <>
-                    {audioBlobUrl && (
-                      <audio src={audioBlobUrl} controls className="h-10 rounded-lg max-w-xs" />
-                    )}
-                    <button
-                      onClick={resetRecording}
-                      className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#18251E] font-semibold px-4 py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>{t('retryRecording')}</span>
-                    </button>
-                    <button
-                      onClick={() => setStep('media')}
-                      className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm cursor-pointer"
-                    >
-                      <span>{t('nextPhotoVideo')}</span>
-                    </button>
-                  </>
-                )}
+
+                  <p className="text-[11px] text-amber-900 font-semibold">
+                    {language === 'gu' ? 'એક પછી એક સવાલનો જવાબ આપો' : language === 'hi' ? 'एक-एक करके प्रश्नों का उत्तर दें' : 'Answer simple questions verbally'}
+                  </p>
+                </div>
               </div>
+
+              {/* Photos & Videos Shortcut */}
+              <div className="pt-4 border-t border-emerald-900/10 space-y-3">
+                <span className="text-xs text-[#6B756E] font-medium block">
+                  {t('orStartMedia')}
+                </span>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <label className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-emerald-900/20 hover:border-[#104C35] text-[#104C35] text-xs font-bold cursor-pointer shadow-xs">
+                    <Camera className="w-4 h-4 text-emerald-700" />
+                    <span>{t('photoUploadBtn')}</span>
+                    <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
+                  </label>
+                  <label className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-emerald-900/20 hover:border-[#104C35] text-[#104C35] text-xs font-bold cursor-pointer shadow-xs">
+                    <Video className="w-4 h-4 text-emerald-700" />
+                    <span>{t('videoUploadBtn')}</span>
+                    <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+                  </label>
+                </div>
+              </div>
+
+              {/* If audio has been recorded, show review card */}
+              {audioBlobUrl && (
+                <div className="mt-6 p-5 bg-emerald-50 rounded-2xl border border-emerald-200 text-left space-y-3 max-w-xl mx-auto">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#104C35] flex items-center gap-1.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-600" />
+                      <span>{language === 'gu' ? 'અવાજ રેકોર્ડ થયો' : language === 'hi' ? 'आवाज़ रिकॉर्ड हुई' : 'Voice Recorded'}</span>
+                    </span>
+                    <audio src={audioBlobUrl} controls className="h-8 max-w-[200px]" />
+                  </div>
+                  <p className="text-xs text-[#6B756E] italic bg-white p-3 rounded-xl border border-emerald-100">
+                    "{audioTranscript}"
+                  </p>
+                  <button
+                    onClick={() => setStep('media')}
+                    className="w-full py-3 bg-[#104C35] hover:bg-[#176B45] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                  >
+                    {t('nextPhotoVideo')}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
-          {/* STEP 3: PHOTO & VIDEO UPLOADS */}
+          {/* STEP: MEDIA UPLOADS */}
           {step === 'media' && (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-emerald-900/10 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-emerald-900/10 pb-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-[#104C35]">{t('mediaTitle')}</h3>
-                    <AudioInstructionButton
-                      text={t('voiceInstructionPhoto')}
-                      size="sm"
-                    />
-                  </div>
-                  <p className="text-xs text-[#6B756E] mt-1">{t('voiceInstructionPhoto')}</p>
+                  <h2 className="text-xl font-bold text-[#104C35] font-serif">
+                    {t('photoUploadBtn')} & {t('videoUploadBtn')}
+                  </h2>
+                  <p className="text-xs text-[#6B756E]">
+                    {language === 'gu' ? 'તમારા સાધન અથવા મશીનના ફોટો કે વીડિયો ઉમેરો (વૈકલ્પિક)' : language === 'hi' ? 'अपने उपकरण या मशीन की तस्वीरें या वीडियो जोड़ें' : 'Add photos or short video demonstrating your invention'}
+                  </p>
                 </div>
+                <AudioInstructionButton text={t('voiceInstructionPhoto')} size="sm" />
               </div>
 
-              {/* Photo upload zone */}
-              <div className="border-2 border-dashed border-emerald-900/20 rounded-2xl p-6 text-center bg-[#F8FAF7]">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  id="photo-input"
-                  className="hidden"
-                  onChange={handlePhotoUpload}
-                />
-                <label
-                  htmlFor="photo-input"
-                  className="cursor-pointer flex flex-col items-center justify-center space-y-2"
-                >
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-[#176B45] flex items-center justify-center">
-                    <Camera className="w-6 h-6" />
+              {/* Upload Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {photos.map((url, i) => (
+                  <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-emerald-900/20 group">
+                    <img src={url} alt="Upload" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))}
+                      className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-lg opacity-90 hover:opacity-100 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <span className="text-sm font-bold text-[#104C35]">
-                    {t('takePhoto')} {language === 'gu' ? 'અથવા ફોનમાંથી પસંદ કરો' : language === 'hi' ? 'या फोन से चुनें' : 'or choose from phone'}
-                  </span>
-                  <span className="text-xs text-[#6B756E]">
-                    {language === 'gu' ? 'JPG, PNG સપોર્ટેડ' : language === 'hi' ? 'JPG, PNG समर्थित' : 'JPG, PNG supported'}
-                  </span>
+                ))}
+
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-emerald-900/30 hover:border-[#104C35] flex flex-col items-center justify-center text-center p-3 cursor-pointer bg-emerald-50/50 hover:bg-emerald-50 transition-colors">
+                  <Camera className="w-6 h-6 text-[#104C35] mb-1" />
+                  <span className="text-[11px] font-bold text-[#104C35]">{t('photoUploadBtn')}</span>
+                  <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
                 </label>
               </div>
 
-              {/* Photo Previews */}
-              {photos.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
-                  {photos.map((url, i) => (
-                    <div key={i} className="relative rounded-xl overflow-hidden h-24 border border-emerald-900/10">
-                      <img src={url} alt={`Upload preview ${i}`} className="w-full h-full object-cover" />
-                      <button
-                        onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Video upload zone */}
-              <div className="border-2 border-dashed border-emerald-900/20 rounded-2xl p-6 text-center bg-[#F8FAF7]">
-                <input
-                  type="file"
-                  accept="video/*"
-                  id="video-input"
-                  className="hidden"
-                  onChange={handleVideoUpload}
-                />
-                <label
-                  htmlFor="video-input"
-                  className="cursor-pointer flex flex-col items-center justify-center space-y-2"
-                >
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-[#176B45] flex items-center justify-center">
-                    <Video className="w-6 h-6" />
-                  </div>
-                  <span className="text-sm font-bold text-[#104C35]">
-                    {t('recordVideo')} {language === 'gu' ? 'અથવા ક્લિપ પસંદ કરો' : language === 'hi' ? 'या वीडियो क्लिप चुनें' : 'or select a video clip'}
-                  </span>
-                  <span className="text-xs text-[#6B756E]">
-                    {language === 'gu' ? 'મશીન કામ કરતું હોય તેવો ૩૦-૬૦ સેકન્ડનો વીડિયો' : language === 'hi' ? 'मशीन के संचालन का 30-60 सेकंड का वीडियो' : '30-60 second video demonstrating operation'}
-                  </span>
-                </label>
-              </div>
-
-              {videoUrl && (
-                <div className="p-3 bg-emerald-50 rounded-xl flex items-center justify-between text-xs text-[#104C35]">
-                  <span className="font-semibold">
-                    {language === 'gu' ? 'વીડિયો અપલોડ માટે તૈયાર છે' : language === 'hi' ? 'वीडियो अपलोड के लिए तैयार है' : 'Video ready for upload'}
-                  </span>
-                  <button onClick={() => setVideoUrl(null)} className="text-red-600 font-bold">
-                    {language === 'gu' ? 'દૂર કરો' : language === 'hi' ? 'हटाएं' : 'Remove'}
-                  </button>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center pt-4 border-t border-emerald-900/10">
+              <div className="flex justify-between pt-4 border-t border-emerald-900/10">
                 <button
-                  onClick={() => setStep('recording')}
-                  className="text-xs font-semibold text-[#6B756E] hover:text-[#18251E] cursor-pointer"
+                  onClick={() => setStep('intro')}
+                  className="px-5 py-2.5 border border-emerald-900/20 text-[#6B756E] text-xs font-bold rounded-xl cursor-pointer"
                 >
                   {t('backAudio')}
                 </button>
                 <button
                   onClick={() => setStep('location')}
-                  className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm cursor-pointer"
+                  className="px-6 py-2.5 bg-[#104C35] hover:bg-[#176B45] text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
                 >
-                  <span>{t('nextLocation')}</span>
+                  {t('nextLocation')}
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 4: LOCATION SELECTION */}
+          {/* STEP: LOCATION */}
           {step === 'location' && (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-emerald-900/10 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-emerald-900/10 pb-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-[#104C35]">{t('locationTitle')}</h3>
-                    <AudioInstructionButton
-                      text={t('voiceInstructionLocation')}
-                      size="sm"
-                    />
-                  </div>
-                  <p className="text-xs text-[#6B756E] mt-1">{t('voiceInstructionLocation')}</p>
+                  <h2 className="text-xl font-bold text-[#104C35] font-serif">
+                    {t('locationTitle')}
+                  </h2>
+                  <p className="text-xs text-[#6B756E]">
+                    {t('locationSubtitle')}
+                  </p>
                 </div>
+                <AudioInstructionButton text={t('voiceInstructionLocation')} size="sm" />
               </div>
 
-              {/* GPS Quick Button (Optional, never forces GPS) */}
-              <div className="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-[#176B45]" />
-                  <div>
-                    <p className="text-xs font-bold text-[#104C35]">
-                      {language === 'gu'
-                        ? 'સ્વચાલિત સ્થાન શોધ (GPS - વૈકલ્પિક)'
-                        : language === 'hi'
-                        ? 'स्वचालित स्थान खोज (GPS - वैकल्पिक)'
-                        : 'Auto Location Detection (GPS - Optional)'}
-                    </p>
-                    <p className="text-[11px] text-[#6B756E]">
-                      {language === 'gu'
-                        ? 'પરવાનગી સાથે રાજ્ય અને જિલ્લો આપોઆપ સેટ કરો'
-                        : language === 'hi'
-                        ? 'अनुमति मिलने पर राज्य और जिला स्वतः सेट करें'
-                        : 'Set state and district automatically with permission'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleGetLocation}
-                  disabled={gpsLoading}
-                  className="w-full sm:w-auto bg-white border border-emerald-900/20 text-[#176B45] font-bold text-xs px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-100/50 cursor-pointer"
-                >
+              {/* GPS Auto-detect Button */}
+              <button
+                type="button"
+                onClick={detectGPSLocation}
+                disabled={gpsLoading}
+                className="w-full flex items-center justify-center gap-2 p-3 bg-emerald-50 hover:bg-emerald-100 text-[#104C35] border border-emerald-300 rounded-2xl text-xs font-bold transition-all cursor-pointer"
+              >
+                <MapPin className="w-4 h-4 text-emerald-700" />
+                <span>
                   {gpsLoading
-                    ? (language === 'gu' ? 'શોધી રહ્યા છીએ...' : language === 'hi' ? 'खोज रहे हैं...' : 'Detecting...')
-                    : t('useGpsBtn')}
-                </button>
-              </div>
+                    ? (language === 'gu' ? 'સ્થાન શોધી રહ્યા છીએ...' : language === 'hi' ? 'स्थान खोज रहे हैं...' : 'Detecting GPS location...')
+                    : (language === 'gu' ? 'જીપીએસ દ્વારા મારું ગામ શોધો' : language === 'hi' ? 'जीपीएस से मेरा स्थान पहचानें' : 'Identify my location via GPS')}
+                </span>
+              </button>
 
-              {gpsError && (
-                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs">
-                  {gpsError}
-                </div>
-              )}
-
-              {/* Manual Selectors */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#18251E] mb-1.5">{t('selectState')}</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-[#104C35]">{t('profileState')}</label>
                   <select
                     value={state}
                     onChange={e => {
                       setState(e.target.value);
-                      const dists = INDIAN_STATES_DISTRICTS[e.target.value] || [];
-                      if (dists.length > 0) setDistrict(dists[0]);
+                      setDistrict(INDIAN_STATES_DISTRICTS[e.target.value]?.[0] || '');
                     }}
-                    className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-[#176B45]"
+                    className="w-full bg-[#F8FAF7] border border-emerald-900/15 rounded-xl p-3 font-semibold"
                   >
                     {Object.keys(INDIAN_STATES_DISTRICTS).map(st => (
                       <option key={st} value={st}>{st}</option>
@@ -931,347 +1017,181 @@ function InnovatorPortalContent() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-[#18251E] mb-1.5">{t('selectDistrict')}</label>
+                <div className="space-y-1">
+                  <label className="font-bold text-[#104C35]">{t('profileDistrict')}</label>
                   <select
                     value={district}
                     onChange={e => setDistrict(e.target.value)}
-                    className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-[#176B45]"
+                    className="w-full bg-[#F8FAF7] border border-emerald-900/15 rounded-xl p-3 font-semibold"
                   >
                     {(INDIAN_STATES_DISTRICTS[state] || []).map(dist => (
                       <option key={dist} value={dist}>{dist}</option>
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#18251E] mb-1.5">{t('enterVillage')}</label>
-                <input
-                  type="text"
-                  placeholder={
-                    language === 'gu'
-                      ? 'દા.ત. રાધનપુર, પાટણ અથવા તમારા ગામનું નામ'
-                      : language === 'hi'
-                      ? 'उदा. राधनपुर, पाटन या अपने गांव का नाम'
-                      : 'e.g. Radhanpur, Patan or your village name'
-                  }
-                  value={village}
-                  onChange={e => setVillage(e.target.value)}
-                  className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#176B45]"
-                />
-              </div>
-
-              {/* Optional Contact Details if Option A (Self) */}
-              {pathway === 'self' && (
-                <div className="border-t border-emerald-900/10 pt-4 space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#104C35]">
-                    <Phone className="w-3.5 h-3.5 text-[#176B45]" />
-                    <span>
-                      {language === 'gu'
-                        ? 'આવિષ્કારકની વિગતો (વૈકલ્પિક - પ્રાઈવસી શીલ્ડ હેઠળ સુરક્ષિત)'
-                        : language === 'hi'
-                        ? 'आविष्कारक का विवरण (वैकल्पिक - गोपनीयता सुरक्षित)'
-                        : "Innovator's Details (Optional - Privacy Protected)"}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[#6B756E] mb-1">
-                        {language === 'gu' ? 'તમારું પૂરું નામ' : language === 'hi' ? 'आपका पूरा नाम' : 'Your Full Name'}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={
-                          language === 'gu'
-                            ? 'દા.ત. રમેશભાઈ પટેલ'
-                            : language === 'hi'
-                            ? 'उदा. रमेश भाई पटेल'
-                            : 'e.g. Ramesh Patel'
-                        }
-                        value={innovatorName}
-                        onChange={e => setInnovatorName(e.target.value)}
-                        className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-2.5 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[#6B756E] mb-1">
-                        {language === 'gu'
-                          ? 'મોબાઇલ નંબર (SMS અપડેટ્સ માટે)'
-                          : language === 'hi'
-                          ? 'मोबाइल नंबर (SMS अपडेट के लिए)'
-                          : 'Mobile Number (For SMS updates)'}
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="+91 98765 43210"
-                        value={innovatorPhone}
-                        onChange={e => setInnovatorPhone(e.target.value)}
-                        className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-2.5 text-sm"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-[#6B756E]">
-                    {language === 'gu'
-                      ? 'અમે તમારો મોબાઇલ નંબર ક્યારેય સાર્વજનિક નથી કરતા. માત્ર ચકાસાયેલ સંસ્થાઓ પરવાનગી સાથે જ સંપર્ક કરી શકે છે.'
-                      : language === 'hi'
-                      ? 'हम आपका मोबाइल नंबर कभी सार्वजनिक नहीं करते। केवल सत्यापित संस्थाएं ही अनुमति के साथ संपर्क कर सकती हैं।'
-                      : 'We never publicly display your phone number. Only verified organizations may contact you with your consent.'}
-                  </p>
+                <div className="space-y-1">
+                  <label className="font-bold text-[#104C35]">{t('profileVillage')}</label>
+                  <input
+                    type="text"
+                    value={village}
+                    onChange={e => setVillage(e.target.value)}
+                    placeholder="e.g. Radhanpur"
+                    className="w-full bg-[#F8FAF7] border border-emerald-900/15 rounded-xl p-3"
+                  />
                 </div>
-              )}
+              </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-emerald-900/10">
+              <div className="flex justify-between pt-4 border-t border-emerald-900/10">
                 <button
                   onClick={() => setStep('media')}
-                  className="text-xs font-semibold text-[#6B756E] hover:text-[#18251E] cursor-pointer"
+                  className="px-5 py-2.5 border border-emerald-900/20 text-[#6B756E] text-xs font-bold rounded-xl cursor-pointer"
                 >
                   {t('backMedia')}
                 </button>
                 <button
-                  onClick={processSubmissionWithAI}
-                  className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm cursor-pointer"
+                  onClick={() => processAIClassification(audioTranscript || 'Grassroots machine')}
+                  className="px-6 py-2.5 bg-[#104C35] hover:bg-[#176B45] text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
                 >
-                  <Sparkles className="w-4 h-4 text-emerald-300" />
-                  <span>{t('processVoiceWithAI')} →</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{language === 'gu' ? 'AI દ્વારા વિશ્લેષણ કરો' : language === 'hi' ? 'एआई द्वारा समझें' : 'Analyze with AI'} →</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 5: AI PROFILE CONFIRMATION & REVIEW */}
+          {/* STEP: AI REVIEW & CLASSIFICATION (REQUIREMENT 9) */}
           {step === 'ai-review' && (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-emerald-900/10 shadow-sm space-y-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-emerald-900/10 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <span>KHOJ AI • {language === 'gu' ? 'સ્વયંચાલિત વર્ગીકરણ' : language === 'hi' ? 'स्वचालित वर्गीकरण' : 'Automatic Classification'}</span>
+                  </span>
+                  <h2 className="text-xl font-bold text-[#104C35] font-serif mt-0.5">
+                    {language === 'gu' ? 'તૈયાર થયેલ આવિષ્કાર પ્રોફાઇલ' : language === 'hi' ? 'तैयार नवाचार प्रोफ़ाइल' : 'Generated Innovation Profile'}
+                  </h2>
+                </div>
+                <AudioInstructionButton text={t('voiceInstructionConfirmation')} size="sm" />
+              </div>
+
               {aiProcessing ? (
-                <div className="py-16 text-center space-y-4">
-                  <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <h3 className="text-lg font-bold text-[#104C35]">{t('aiAnalyzing')}</h3>
-                  <p className="text-xs text-[#6B756E] max-w-sm mx-auto">
-                    {t('aiAnalyzingDesc')}
-                  </p>
+                <div className="py-12 text-center space-y-4">
+                  <div className="w-12 h-12 border-4 border-[#104C35] border-t-amber-500 rounded-full animate-spin mx-auto" />
+                  <p className="text-sm font-bold text-[#104C35]">{t('aiAnalyzing')}</p>
+                  <p className="text-xs text-[#6B756E] max-w-sm mx-auto">{t('aiAnalyzingDesc')}</p>
                 </div>
               ) : (
-                <>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-900/10 pb-4">
+                <div className="space-y-4">
+                  {/* Generated Details */}
+                  <div className="p-5 bg-emerald-50/70 rounded-2xl border border-emerald-200/80 space-y-3 text-xs">
                     <div>
-                      <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#176B45] bg-emerald-50 px-2.5 py-1 rounded-full mb-1">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>{language === 'gu' ? 'AI ચોકસાઈ સ્કોર' : language === 'hi' ? 'एआई सटीकता स्कोर' : 'AI Accuracy Score'}: {aiConfidence}%</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-bold text-[#104C35]">{t('aiGeneratedProfile')}</h3>
-                        <AudioInstructionButton
-                          text={`${t('voiceInstructionConfirmation')}. ${aiTitle[language] || aiTitle.gu || aiTitle.en}. ${aiProblem[language] || aiProblem.gu || aiProblem.en}. ${aiSolution[language] || aiSolution.gu || aiSolution.en}`}
-                          label={t('readAloud')}
-                          size="sm"
-                        />
-                      </div>
+                      <span className="text-[#6B756E] font-semibold block">{language === 'gu' ? 'આવિષ્કારનું નામ:' : language === 'hi' ? 'नवाचार का नाम:' : 'Innovation Title:'}</span>
+                      <p className="text-sm font-bold text-[#104C35]">{aiTitle[language] || aiTitle.gu || aiTitle.en}</p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setIsEditingAi(!isEditingAi)}
-                        className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#18251E] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>{isEditingAi ? 'Done Editing' : t('editInformation')}</span>
-                      </button>
+                    <div>
+                      <span className="text-[#6B756E] font-semibold block">{language === 'gu' ? 'મુશ્કેલી / સમસ્યા:' : language === 'hi' ? 'समस्या:' : 'Problem Solved:'}</span>
+                      <p className="text-[#18251E]">{aiProblem[language] || aiProblem.gu || aiProblem.en}</p>
+                    </div>
+
+                    <div>
+                      <span className="text-[#6B756E] font-semibold block">{language === 'gu' ? 'દેશી ઉપાય / ટેકનોલોજી:' : language === 'hi' ? 'समाधान:' : 'Proposed Solution:'}</span>
+                      <p className="text-[#18251E]">{aiSolution[language] || aiSolution.gu || aiSolution.en}</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-emerald-200/60">
+                      <span className="px-2.5 py-1 bg-[#104C35] text-white font-bold rounded-lg">
+                        {tSector(aiSector)}
+                      </span>
+                      <span className="px-2.5 py-1 bg-emerald-200 text-emerald-950 font-semibold rounded-lg">
+                        {tStage(aiStage)}
+                      </span>
+                      <span className="px-2.5 py-1 bg-white border border-emerald-300 text-emerald-900 rounded-lg">
+                        Confidence: {aiConfidence}%
+                      </span>
                     </div>
                   </div>
 
-                  {/* Confirmation Audio Note Banner */}
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Volume2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                      <span>{t('voiceInstructionConfirmation')}</span>
-                    </div>
-                    <AudioInstructionButton text={t('voiceInstructionConfirmation')} size="xs" />
-                  </div>
-
-                  {/* Assisted credit banner if Option B */}
-                  {pathway === 'assisted' && (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
-                      <strong>{language === 'gu' ? 'સહાયક નોંધણી:' : language === 'hi' ? 'सहायक पंजीकरण:' : 'Assisted Submission:'}</strong> {language === 'gu' ? 'મૂળ શોધક:' : language === 'hi' ? 'मूल आविष्कारक:' : 'Inventor:'} <u>{innovatorName || (language === 'gu' ? 'ગ્રામીણ શોધક' : language === 'hi' ? 'ग्रामीण आविष्कारक' : 'Rural Innovator')}</u> | {language === 'gu' ? 'નોંધણી કરનાર:' : language === 'hi' ? 'पंजीकरणकर्ता:' : 'Submitter:'} <u>{submitterName || (language === 'gu' ? 'સ્વયંસેવક' : language === 'hi' ? 'स्वयंसेवक' : 'Volunteer')}</u> ({submitterRelationship})
-                    </div>
-                  )}
-
-                  {/* Profile Card Fields */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#6B756E] mb-1">
-                        {t('fieldTitle')}
-                      </label>
-                      {isEditingAi ? (
-                        <input
-                          type="text"
-                          value={aiTitle[language] || aiTitle.gu || aiTitle.en}
-                          onChange={e =>
-                            setAiTitle({ ...aiTitle, [language]: e.target.value })
-                          }
-                          className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm font-bold text-[#104C35]"
-                        />
-                      ) : (
-                        <div className="text-base font-bold text-[#104C35] p-3 bg-emerald-50/50 rounded-xl">
-                          {aiTitle[language] || aiTitle.gu || aiTitle.en}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#6B756E] mb-1">
-                        {t('fieldProblem')}
-                      </label>
-                      {isEditingAi ? (
-                        <textarea
-                          rows={2}
-                          value={aiProblem[language] || aiProblem.gu || aiProblem.en}
-                          onChange={e =>
-                            setAiProblem({ ...aiProblem, [language]: e.target.value })
-                          }
-                          className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm"
-                        />
-                      ) : (
-                        <div className="text-xs text-[#18251E] p-3 bg-gray-50 rounded-xl leading-relaxed">
-                          {aiProblem[language] || aiProblem.gu || aiProblem.en}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#6B756E] mb-1">
-                        {t('fieldSolution')}
-                      </label>
-                      {isEditingAi ? (
-                        <textarea
-                          rows={2}
-                          value={aiSolution[language] || aiSolution.gu || aiSolution.en}
-                          onChange={e =>
-                            setAiSolution({ ...aiSolution, [language]: e.target.value })
-                          }
-                          className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm"
-                        />
-                      ) : (
-                        <div className="text-xs text-[#18251E] p-3 bg-gray-50 rounded-xl leading-relaxed">
-                          {aiSolution[language] || aiSolution.gu || aiSolution.en}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#6B756E] mb-1">
-                          {t('fieldSector')}
-                        </label>
-                        <div className="text-xs font-semibold text-emerald-900 p-2.5 bg-emerald-50 rounded-xl">
-                          {tSector(aiSector)}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#6B756E] mb-1">
-                          {t('fieldStage')}
-                        </label>
-                        <div className="text-xs font-semibold text-emerald-900 p-2.5 bg-emerald-50 rounded-xl">
-                          {tStage(aiStage)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#6B756E] mb-1">
-                        {t('fieldLocation')}
-                      </label>
-                      <div className="text-xs text-[#18251E] p-2.5 bg-gray-50 rounded-xl">
-                        {village || (language === 'gu' ? 'ગામ પંચાયત વિસ્તાર' : language === 'hi' ? 'ग्राम पंचायत क्षेत्र' : 'Village/Panchayat Area')}, {district}, {state}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Confirmation CTA */}
-                  <div className="pt-4 border-t border-emerald-900/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex justify-between pt-4 border-t border-emerald-900/10">
                     <button
                       onClick={() => setStep('location')}
-                      className="w-full sm:w-auto text-xs font-semibold text-[#6B756E] hover:text-[#18251E] py-2 cursor-pointer"
+                      className="px-5 py-2.5 border border-emerald-900/20 text-[#6B756E] text-xs font-bold rounded-xl cursor-pointer"
                     >
                       {t('backLocation')}
                     </button>
                     <button
                       onClick={handleFinalSubmit}
                       disabled={submitting}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-emerald-900/20 transition-all text-sm cursor-pointer"
+                      className="px-8 py-3 bg-[#104C35] hover:bg-[#176B45] text-white text-xs font-bold rounded-2xl shadow-md cursor-pointer flex items-center gap-2"
                     >
-                      <Check className="w-5 h-5 text-emerald-300" />
-                      <span>{submitting ? t('submittingText') : t('confirmAndSubmit')}</span>
+                      <CheckCircle className="w-4 h-4 text-amber-300" />
+                      <span>{submitting ? t('submittingText') : (language === 'gu' ? 'સફળતાપૂર્વક સબમિટ કરો' : language === 'hi' ? 'सफलतापूर्वक जमा करें' : 'Submit Innovation')}</span>
                     </button>
                   </div>
-                </>
+                </div>
               )}
             </div>
           )}
 
-          {/* STEP 6: SUBMISSION SUCCESS & RECEIPT */}
+          {/* STEP: SUCCESS RECEIPT (REQUIREMENT 10) */}
           {step === 'success' && submittedInnovation && (
-            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm text-center space-y-6">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#176B45] flex items-center justify-center mx-auto shadow-inner">
-                <CheckCircle className="w-8 h-8 text-[#176B45]" />
+            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-lg text-center space-y-6 animate-in zoom-in-95">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#104C35] mx-auto flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-emerald-700" />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#104C35] font-serif">
-                    {t('submissionSuccessTitle')}
-                  </h2>
-                  <AudioInstructionButton
-                    text={t('voiceInstructionSuccess')}
-                    size="sm"
-                  />
-                </div>
-                <p className="text-xs sm:text-sm text-[#6B756E] max-w-md mx-auto">
-                  {t('submissionSuccessSubtitle')}
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">
+                  KHOJ (खोज) • REGISTRATION COMPLETE
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#104C35] font-serif">
+                  {t('voiceInstructionSuccess')}
+                </h2>
+                <p className="text-xs text-[#6B756E]">
+                  {language === 'gu'
+                    ? 'તમારો આવિષ્કાર સફળતાપૂર્વક રાષ્ટ્રીય પોર્ટલ પર નોંધાઈ ગયો છે.'
+                    : language === 'hi'
+                    ? 'आपका नवाचार सफलतापूर्वक राष्ट्रीय पोर्टल पर पंजीकृत हो गया है।'
+                    : 'Your innovation has been successfully registered on the national platform.'}
                 </p>
               </div>
 
-              {/* Unique ID Receipt Card */}
-              <div className="bg-[#F8FAF7] border-2 border-emerald-900/15 rounded-2xl p-6 max-w-md mx-auto space-y-3">
-                <p className="text-xs font-semibold text-[#6B756E] uppercase tracking-wider">
+              {/* Official Receipt Card */}
+              <div className="max-w-md mx-auto p-5 bg-[#F8FAF7] rounded-2xl border-2 border-emerald-900/15 text-center space-y-3">
+                <span className="text-[11px] font-bold text-[#6B756E] uppercase tracking-wider">
                   {t('innovationIdLabel')}
-                </p>
-                <p className="text-2xl sm:text-3xl font-extrabold text-[#104C35] font-mono tracking-wider">
+                </span>
+                <p className="text-2xl font-black font-mono text-[#104C35] tracking-wider">
                   {submittedInnovation.id}
                 </p>
 
-                {submittedInnovation.registrationType === 'assisted' && (
-                  <div className="text-xs text-amber-900 bg-amber-50 p-2 rounded-lg border border-amber-200">
-                    {language === 'gu' ? 'મૂળ શોધક:' : language === 'hi' ? 'मूल आविष्कारक:' : 'Inventor:'} <strong>{submittedInnovation.innovatorName}</strong> • {language === 'gu' ? 'સહાયક:' : language === 'hi' ? 'सहायक:' : 'Submitter:'} {submittedInnovation.submitterName} ({submittedInnovation.submitterRelationship})
-                  </div>
-                )}
+                <p className="text-xs font-bold text-[#18251E]">
+                  {submittedInnovation.title[language] || submittedInnovation.title.gu || submittedInnovation.title.en}
+                </p>
 
-                <div className="flex items-center justify-center gap-2 text-xs text-emerald-800">
+                <div className="flex items-center justify-center gap-2 text-xs text-emerald-900 pt-1">
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                   <span className="font-semibold">{submittedInnovation.status}</span>
                   <span>•</span>
                   <span>{submittedInnovation.submissionDate}</span>
                 </div>
-                <div className="text-[11px] text-[#6B756E] pt-2 border-t border-emerald-900/10">
+
+                <p className="text-[11px] text-[#6B756E] pt-2 border-t border-emerald-900/10">
                   {t('keepIdNotice')}
-                </div>
+                </p>
               </div>
 
-              {/* Action buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button
-                  onClick={() => window.print()}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-emerald-900/20 bg-white hover:bg-gray-50 text-[#104C35] text-xs font-bold transition-colors cursor-pointer"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>{t('saveReceiptBtn')}</span>
-                </button>
+              {/* Action Buttons (Requirement 10) */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <Link
                   href={`/innovations/${submittedInnovation.id}`}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#176B45] hover:bg-[#104C35] text-white text-xs font-bold transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#104C35] hover:bg-[#176B45] text-white text-xs font-bold transition-colors"
                 >
-                  {t('trackStatusBtn')} →
+                  {t('viewInnovationBtn')} →
                 </Link>
+
                 <button
                   onClick={() => {
                     setStep('intro');
@@ -1279,10 +1199,17 @@ function InnovatorPortalContent() {
                     setPhotos([]);
                     setVideoUrl(null);
                   }}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-semibold text-[#6B756E] hover:text-[#18251E] cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-emerald-900/20 text-xs font-semibold text-[#18251E] hover:bg-gray-50 cursor-pointer"
                 >
-                  {t('submitAnotherBtn')}
+                  {t('registerAnotherInnovation')}
                 </button>
+
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-50 text-[#104C35] text-xs font-bold hover:bg-emerald-100 transition-colors"
+                >
+                  {t('myDashboardHeading')}
+                </Link>
               </div>
             </div>
           )}
@@ -1294,14 +1221,16 @@ function InnovatorPortalContent() {
 
 export default function InnovatorPortalPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#F7FBF8]">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-[#176B45] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-[#176B45] font-semibold">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#F8FAF7]">
+          <div className="text-center space-y-4">
+            <div className="w-12 h-12 border-4 border-[#104C35] border-t-amber-500 rounded-full animate-spin mx-auto" />
+            <p className="text-[#104C35] font-semibold">Loading KHOJ...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <InnovatorPortalContent />
     </Suspense>
   );

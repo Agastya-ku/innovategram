@@ -18,12 +18,17 @@ export const Footer: React.FC = () => {
               <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white font-serif">
-                {t('brandName')}
-              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold tracking-tight text-white font-serif">
+                  KHOJ (खोज)
+                </span>
+              </div>
             </div>
+            <p className="text-xs text-amber-300 font-semibold leading-relaxed">
+              छोटा या बड़ा, हर आविष्कार पहचान का हकदार।
+            </p>
             <p className="text-xs text-emerald-100/70 leading-relaxed">
-              {t('tagline')}
+              {t('taglineTranslated')}
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-300">
               <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -112,7 +117,7 @@ export const Footer: React.FC = () => {
         {/* Demo Disclaimer & Copyright */}
         <div className="border-t border-emerald-900/60 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-emerald-200/60 gap-4">
           <p>
-            © 2026 InnovateGram Platform. Built for Grassroots & Rural Innovation Discovery.
+            © 2026 KHOJ (खोज) Platform. چھوٹा या बड़ा, हर आविष्कार पहचान का हकदार।
           </p>
           <div className="flex items-center gap-4">
             <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded text-[10px]">

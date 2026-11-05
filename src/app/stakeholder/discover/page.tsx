@@ -215,10 +215,14 @@ export default function DiscoverInnovationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#104C35] font-serif">
-            {t('navDiscover')}
+            {t('discoverHeading')}
           </h1>
           <p className="text-xs text-[#6B756E] mt-1">
-            Search grassroots inventions across languages, states, districts, and sectors with cross-lingual indexing.
+            {language === 'gu'
+              ? 'ભાષાઓ, રાજ્યો, જિલ્લાઓ અને ક્ષેત્રોમાં ગ્રામીણ આવિષ્કારો શોધો.'
+              : language === 'hi'
+              ? 'भाषाओं, राज्यों, जिलों और क्षेत्रों में ग्रामीण नवाचारों को खोजें।'
+              : 'Search grassroots inventions across languages, states, districts, and sectors with cross-lingual indexing.'}
           </p>
         </div>
         <div className="flex items-center gap-2">

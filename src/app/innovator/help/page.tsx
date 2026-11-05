@@ -26,7 +26,7 @@ export default function InnovatorHelpPage() {
         gu: 'શું આવિષ્કાર સબમિટ કરવા માટે કોઈ તકનીકી જ્ઞાન કે કાગળિયાની જરૂર છે?'
       },
       a: {
-        en: 'No. InnovateGram requires NO GST, company registration, Aadhaar, or business plan. You only need to explain your idea using the voice recorder.',
+        en: 'No. KHOJ requires NO GST, company registration, Aadhaar, or business plan. You only need to explain your idea using the voice recorder.',
         hi: 'बिल्कुल नहीं। आपको किसी जीएसटी, आधार या कंपनी पंजीकरण की आवश्यकता नहीं है। बस माइक दबाएं और अपनी भाषा में समझाएं।',
         gu: 'બિલકુલ નહીં. કોઈ જીએસટી, આધાર કે કંપનીની જરૂર નથી. ફક્ત માઇક દબાવીને તમારી ભાષામાં વાત કરો.'
       }
@@ -38,7 +38,7 @@ export default function InnovatorHelpPage() {
         gu: 'શું મારો મોબાઇલ નંબર કે ઘરનું સરનામું જાહેર થાય છે?'
       },
       a: {
-        en: 'Never. InnovateGram enforces a Rural Data Privacy Shield. Only the village and district name are shown. Organizations must request consent through the portal to contact you.',
+        en: 'Never. KHOJ enforces a Rural Data Privacy Shield. Only the village and district name are shown. Organizations must request consent through the portal to contact you.',
         hi: 'कभी नहीं। केवल गांव और जिले का नाम दिखाया जाता है। कोई भी संस्था आपकी सहमति के बिना आपका फोन नंबर नहीं देख सकती।',
         gu: 'ક્યારેય નહીં. ફક્ત ગામ અને જિલ્લાનું નામ જ દેખાય છે. સંસ્થાઓ તમારી પરવાનગી પછી જ તમારો સંપર્ક કરી શકે છે.'
       }
@@ -85,7 +85,7 @@ export default function InnovatorHelpPage() {
                   ? 'इनोवेटग्राम में आपका स्वागत है। यहां आप अपनी भाषा में बोलकर अपने आविष्कार के बारे में बता सकते हैं। आपको कोई फॉर्म भरने की जरूरत नहीं है।'
                   : language === 'gu'
                   ? 'ઇનોવેટગ્રામમાં તમારું સ્વાગત છે. અહીં તમે બોલીને તમારા આવિષ્કારની માહિતી આપી શકો છો. કોઈ ફોર્મ ભરવાની જરૂર નથી.'
-                  : 'Welcome to InnovateGram. You can speak naturally in English, Hindi or Gujarati. You do not need to fill complicated forms.'
+                  : 'Welcome to KHOJ. You can speak naturally in English, Hindi or Gujarati. You do not need to fill complicated forms.'
               )
             }
             className="flex items-center gap-1.5 bg-[#176B45] hover:bg-[#104C35] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
