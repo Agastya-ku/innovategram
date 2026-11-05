@@ -17,7 +17,9 @@ import {
   Menu,
   X,
   User,
-  MapPin
+  MapPin,
+  Plus,
+  ArrowRight
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -40,7 +42,7 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#F8FAF7]/95 backdrop-blur-md border-b border-emerald-900/10 shadow-xs">
+    <header className="sticky top-0 z-50 bg-[#F8FAF7]/95 backdrop-blur-md border-b border-emerald-950/10 shadow-xs transition-all">
       {/* Top Offline Notification Bar */}
       {!isOnline && (
         <div className="bg-amber-600 text-white text-xs py-1.5 px-4 text-center flex items-center justify-center gap-2 font-medium">
@@ -64,104 +66,74 @@ export const Header: React.FC = () => {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18">
+        <div className="flex items-center justify-between h-20">
           {/* Logo & KHOJ Brand Identity */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#104C35] to-[#176B45] flex items-center justify-center shadow-md shadow-emerald-900/20 text-white transform group-hover:scale-105 transition-transform border border-amber-500/30">
+          <Link href="/" className="flex items-center gap-3.5 group shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#0D3826] via-[#104C35] to-[#176B45] flex items-center justify-center shadow-md shadow-emerald-950/20 text-white transform group-hover:scale-105 transition-all border border-amber-400/40">
               <Sparkles className="w-5 h-5 text-amber-300" />
             </div>
             <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black tracking-tight text-[#104C35] font-serif">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl sm:text-3xl font-black tracking-tight text-[#0D3826] font-serif">
                   KHOJ
                 </span>
-                <span className="text-lg font-bold text-amber-700 font-serif">
+                <span className="text-xl sm:text-2xl font-bold text-amber-600 font-serif">
                   खोज
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100/90 text-[#104C35] px-2 py-0.5 rounded-full border border-emerald-300">
-                  રાષ્ટ્રીય મંચ
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-[#0D3826] px-2 py-0.5 rounded-full border border-emerald-300/80">
+                  {language === 'gu' ? 'રાષ્ટ્રીય મંચ' : language === 'hi' ? 'राष्ट्रीय मंच' : 'National Platform'}
                 </span>
               </div>
-              <p className="text-[11px] font-semibold text-emerald-900/90 tracking-tight leading-tight truncate max-w-sm sm:max-w-md">
+              <p className="text-[11px] font-semibold text-amber-800/90 tracking-tight leading-none mt-0.5">
                 छोटा या बड़ा, हर आविष्कार पहचान का हकदार।
               </p>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-emerald-950/5 p-1 rounded-xl border border-emerald-900/10">
-            {/* Register an Innovation Button */}
-            <Link
-              href="/innovator"
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all ${
-                isInnovator && !isDashboard
-                  ? 'bg-[#104C35] text-white shadow-xs'
-                  : 'text-[#104C35] hover:bg-emerald-100/60'
-              }`}
-            >
-              <Mic className="w-4 h-4 text-amber-500" />
-              <span>{t('registerInnovationBtn')}</span>
-            </Link>
-
-            {/* Discover Innovations */}
+          {/* Desktop Navigation Links */}
+          <nav className="hidden xl:flex items-center gap-1">
             <Link
               href="/stakeholder/discover"
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 isDiscover
-                  ? 'bg-[#176B45] text-white shadow-xs'
-                  : 'text-[#18251E] hover:text-[#176B45] hover:bg-emerald-50'
+                  ? 'bg-emerald-100 text-[#0D3826]'
+                  : 'text-[#4A5550] hover:text-[#0D3826] hover:bg-emerald-50/70'
               }`}
             >
-              <Compass className="w-4 h-4 text-emerald-600" />
+              <Compass className="w-3.5 h-3.5 text-[#104C35]" />
               <span>{t('discoverInnovationsBtn')}</span>
             </Link>
 
-            {/* Interactive Map */}
             <Link
               href="/stakeholder/map"
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 isMap
-                  ? 'bg-[#176B45] text-white'
-                  : 'text-[#6B756E] hover:text-[#18251E] hover:bg-emerald-50'
+                  ? 'bg-emerald-100 text-[#0D3826]'
+                  : 'text-[#4A5550] hover:text-[#0D3826] hover:bg-emerald-50/70'
               }`}
             >
-              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+              <MapPin className="w-3.5 h-3.5 text-[#104C35]" />
               <span>{t('interactiveMapBtn')}</span>
             </Link>
 
-            {/* Returning User Dashboard */}
-            <Link
-              href="/dashboard"
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                isDashboard
-                  ? 'bg-[#104C35] text-white'
-                  : 'text-[#6B756E] hover:text-[#18251E] hover:bg-emerald-50'
-              }`}
-            >
-              <User className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{currentProfile ? currentProfile.fullName.split(' ')[0] : t('myDashboardHeading')}</span>
-            </Link>
-
-            {/* Stakeholder Portal */}
             <Link
               href="/stakeholder"
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 isStakeholder
-                  ? 'bg-[#176B45] text-white'
-                  : 'text-[#6B756E] hover:text-[#18251E] hover:bg-emerald-50'
+                  ? 'bg-emerald-100 text-[#0D3826]'
+                  : 'text-[#4A5550] hover:text-[#0D3826] hover:bg-emerald-50/70'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
+              <Layers className="w-3.5 h-3.5 text-[#104C35]" />
               <span>{t('portalStakeholder')}</span>
             </Link>
 
-            {/* Admin Portal */}
             <Link
               href="/admin"
-              className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                 isAdmin
-                  ? 'bg-emerald-950 text-white'
-                  : 'text-[#6B756E] hover:text-[#18251E]'
+                  ? 'bg-[#0D3826] text-white'
+                  : 'text-[#6B756E] hover:text-[#0D3826] hover:bg-emerald-50/50'
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -169,20 +141,48 @@ export const Header: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Language Switcher */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-white border border-emerald-900/15 rounded-lg p-0.5 shadow-xs">
-              <div className="px-2 py-1 text-emerald-700 hidden sm:flex items-center gap-1">
+          {/* Right Action Cluster: User Dashboard + Register CTA + Language */}
+          <div className="flex items-center gap-3">
+            {/* User Profile or Dashboard Chip */}
+            <Link
+              href="/dashboard"
+              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                isDashboard
+                  ? 'bg-emerald-100 border-emerald-300 text-[#0D3826]'
+                  : 'bg-white border-emerald-950/15 text-[#4A5550] hover:border-[#104C35] hover:text-[#0D3826]'
+              }`}
+            >
+              <div className="w-5 h-5 rounded-full bg-emerald-100 text-[#104C35] flex items-center justify-center font-bold text-[10px]">
+                {currentProfile ? currentProfile.fullName.charAt(0) : <User className="w-3 h-3" />}
+              </div>
+              <span className="truncate max-w-[120px]">
+                {currentProfile ? currentProfile.fullName.split(' ')[0] : t('myDashboardHeading')}
+              </span>
+            </Link>
+
+            {/* Primary Action Button: Register Innovation */}
+            <Link
+              href="/innovator"
+              className="hidden sm:inline-flex items-center gap-2 bg-[#0D3826] hover:bg-[#176B45] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all border border-emerald-700/50 group"
+            >
+              <Mic className="w-3.5 h-3.5 text-amber-300 group-hover:scale-110 transition-transform" />
+              <span>{t('registerInnovationBtn')}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-emerald-300 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            {/* Language Switcher */}
+            <div className="flex items-center bg-white border border-emerald-950/15 rounded-xl p-1 shadow-2xs">
+              <div className="px-1.5 text-emerald-700 hidden sm:flex items-center">
                 <Globe className="w-3.5 h-3.5" />
               </div>
               {languages.map(lang => (
                 <button
                   key={lang.code}
                   onClick={() => setLanguage(lang.code)}
-                  className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     language === lang.code
-                      ? 'bg-[#104C35] text-white shadow-xs'
-                      : 'text-[#18251E] hover:bg-emerald-50'
+                      ? 'bg-[#0D3826] text-white shadow-2xs'
+                      : 'text-[#4A5550] hover:text-[#0D3826] hover:bg-emerald-50/70'
                   }`}
                   title={lang.label}
                 >
@@ -191,10 +191,10 @@ export const Header: React.FC = () => {
               ))}
             </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg text-emerald-950 hover:bg-emerald-50 border border-emerald-900/10 cursor-pointer"
+              className="xl:hidden p-2 rounded-xl text-emerald-950 hover:bg-emerald-50 border border-emerald-950/15 cursor-pointer"
               aria-label="Toggle navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -204,11 +204,11 @@ export const Header: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-3 border-t border-emerald-900/10 space-y-2">
+          <div className="xl:hidden py-4 border-t border-emerald-950/10 space-y-2.5 animate-in slide-in-from-top-2">
             {/* Mobile Language Switcher */}
-            <div className="flex items-center justify-between p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
-              <span className="text-xs font-bold text-[#104C35] flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-emerald-700" />
+            <div className="flex items-center justify-between p-3 bg-emerald-50/90 rounded-2xl border border-emerald-200">
+              <span className="text-xs font-bold text-[#0D3826] flex items-center gap-1.5">
+                <Globe className="w-4 h-4 text-emerald-700" />
                 <span>{t('selectLanguagePrompt')}</span>
               </span>
               <div className="flex items-center gap-1">
@@ -219,9 +219,9 @@ export const Header: React.FC = () => {
                       setLanguage(lang.code);
                       setMobileMenuOpen(false);
                     }}
-                    className={`px-2 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                       language === lang.code
-                        ? 'bg-[#104C35] text-white shadow-xs'
+                        ? 'bg-[#0D3826] text-white shadow-xs'
                         : 'bg-white text-[#18251E] border border-gray-200'
                     }`}
                   >
@@ -234,54 +234,57 @@ export const Header: React.FC = () => {
             <Link
               href="/innovator"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#104C35] text-white font-bold text-sm"
+              className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[#0D3826] text-white font-bold text-sm shadow-xs"
             >
-              <Mic className="w-4 h-4 text-amber-400" />
-              <span>{t('registerInnovationBtn')}</span>
+              <div className="flex items-center gap-2.5">
+                <Mic className="w-4 h-4 text-amber-300" />
+                <span>{t('registerInnovationBtn')}</span>
+              </div>
+              <ArrowRight className="w-4 h-4 text-emerald-300" />
+            </Link>
+
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-emerald-50 text-[#18251E] font-bold text-xs"
+            >
+              <User className="w-4 h-4 text-[#104C35]" />
+              <span>{t('myDashboardHeading')}</span>
             </Link>
 
             <Link
               href="/stakeholder/discover"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-emerald-50 text-[#18251E] font-semibold text-sm"
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-emerald-50 text-[#18251E] font-semibold text-xs"
             >
-              <Compass className="w-4 h-4 text-[#176B45]" />
+              <Compass className="w-4 h-4 text-[#104C35]" />
               <span>{t('discoverInnovationsBtn')}</span>
             </Link>
 
             <Link
               href="/stakeholder/map"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-emerald-50 text-[#18251E] font-medium text-sm"
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-emerald-50 text-[#18251E] font-semibold text-xs"
             >
-              <MapPin className="w-4 h-4 text-[#176B45]" />
+              <MapPin className="w-4 h-4 text-[#104C35]" />
               <span>{t('interactiveMapBtn')}</span>
-            </Link>
-
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-emerald-50 text-[#18251E] font-medium text-sm"
-            >
-              <User className="w-4 h-4 text-[#176B45]" />
-              <span>{t('myDashboardHeading')}</span>
             </Link>
 
             <Link
               href="/stakeholder"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-emerald-50 text-[#18251E] font-medium text-sm"
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-emerald-50 text-[#18251E] font-semibold text-xs"
             >
-              <Layers className="w-4 h-4 text-[#176B45]" />
+              <Layers className="w-4 h-4 text-[#104C35]" />
               <span>{t('portalStakeholder')}</span>
             </Link>
 
             <Link
               href="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-emerald-50 text-[#18251E] font-medium text-sm"
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-emerald-50 text-[#18251E] font-medium text-xs"
             >
-              <ShieldCheck className="w-4 h-4 text-[#176B45]" />
+              <ShieldCheck className="w-4 h-4 text-[#104C35]" />
               <span>{t('portalAdmin')}</span>
             </Link>
           </div>
