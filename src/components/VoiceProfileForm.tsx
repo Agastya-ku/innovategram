@@ -44,6 +44,11 @@ export const VoiceProfileForm: React.FC<VoiceProfileFormProps> = ({ onProfileCre
   const { language, t } = useLanguage();
   const { addProfile } = useInnovations();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Current question step: 0: Name, 1: State/District, 2: Village, 3: Phone/OTP, 4: Visibility & Social
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -252,10 +257,8 @@ export const VoiceProfileForm: React.FC<VoiceProfileFormProps> = ({ onProfileCre
     }
   };
 
-  // Automatically read question aloud on step change
-  useEffect(() => {
-    playQuestionAudio();
-  }, [currentStep]);
+  // Auto speech on mount removed to adhere to rule: "Do not autoplay audio without user interaction"
+  // User can click speaker icon or replay button anytime
 
   // Handle phone verification
   const handleSendOtp = () => {
@@ -334,6 +337,14 @@ export const VoiceProfileForm: React.FC<VoiceProfileFormProps> = ({ onProfileCre
       onCancel();
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="bg-white rounded-3xl border border-emerald-900/10 p-10 text-center">
+        <div className="w-8 h-8 border-3 border-[#104C35] border-t-transparent rounded-full animate-spin mx-auto" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-3xl border-2 border-emerald-900/15 shadow-xl p-6 sm:p-10 space-y-8 animate-in fade-in">
@@ -697,3 +708,4 @@ export const VoiceProfileForm: React.FC<VoiceProfileFormProps> = ({ onProfileCre
     </div>
   );
 };
+

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
@@ -40,6 +40,11 @@ export default function DashboardPage() {
     innovations
   } = useInnovations();
   const router = useRouter();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Login form state if user is not logged in
   const [phoneInput, setPhoneInput] = useState('');
@@ -138,6 +143,17 @@ export default function DashboardPage() {
     });
     setIsEditingProfile(false);
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-4 border-[#104C35] border-t-amber-500 rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-bold text-[#104C35]">Loading KHOJ Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   // 1. IF NOT LOGGED IN: SHOW PHONE + OTP RETURNING USER LOGIN
   if (!currentProfile) {
@@ -773,3 +789,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

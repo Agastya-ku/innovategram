@@ -63,14 +63,22 @@ function InnovatorPortalContent() {
   const modeParam = searchParams.get('mode');
   const pathwayParam = searchParams.get('pathway');
 
+  // Client mount check to eliminate React hydration mismatch errors
+  const [mounted, setMounted] = useState(false);
+
   // Top level screen state: 'gate' | 'profile-create' | 'profile-ready' | 'innovation-form'
-  const [activeScreen, setActiveScreen] = useState<'gate' | 'profile-create' | 'profile-ready' | 'innovation-form'>(
-    modeParam === 'new'
-      ? 'profile-create'
-      : currentProfile
-      ? 'innovation-form'
-      : 'gate'
-  );
+  const [activeScreen, setActiveScreen] = useState<'gate' | 'profile-create' | 'profile-ready' | 'innovation-form'>('gate');
+
+  useEffect(() => {
+    setMounted(true);
+    if (modeParam === 'new') {
+      setActiveScreen('profile-create');
+    } else if (modeParam === 'login') {
+      router.push('/dashboard');
+    } else if (currentProfile) {
+      setActiveScreen('innovation-form');
+    }
+  }, [modeParam, currentProfile, router]);
 
   // Recently created profile in this session
   const [justCreatedProfile, setJustCreatedProfile] = useState<InnovatorProfile | null>(null);
@@ -416,6 +424,17 @@ function InnovatorPortalContent() {
       setSubmitting(false);
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-4 border-[#104C35] border-t-amber-500 rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-bold text-[#104C35]">Loading KHOJ...</p>
+        </div>
+      </div>
+    );
+  }
 
   // =========================================================================
   // SCREEN 1: WELCOME GATE (REQUIREMENT 4: NEW USER vs EXISTING USER)
