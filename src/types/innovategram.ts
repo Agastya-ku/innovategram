@@ -60,6 +60,11 @@ export interface Innovation {
   stage: Stage;
   status: VerificationStatus;
   location: LocationInfo;
+  registrationType?: 'self' | 'assisted';
+  submitterName?: string;
+  submitterRelationship?: string;
+  submitterPhoneMasked?: string;
+  innovatorConsentGiven?: boolean;
   innovatorName?: string;
   innovatorContactProtected: boolean;
   innovatorPhoneMasked?: string;

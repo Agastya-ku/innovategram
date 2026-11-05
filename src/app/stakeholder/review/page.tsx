@@ -163,6 +163,19 @@ export default function ReviewSubmissionsPage() {
               </div>
             </div>
 
+            {/* Registration Pathway Attribution */}
+            {selectedInnovation.registrationType === 'assisted' && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-center justify-between">
+                <div>
+                  <span className="font-bold">સહાયક નોંધણી (Assisted Submission):</span>{' '}
+                  શોધક: <strong>{selectedInnovation.innovatorName}</strong> • નોંધણી કરનાર: <strong>{selectedInnovation.submitterName}</strong> ({selectedInnovation.submitterRelationship})
+                </div>
+                <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded">
+                  સંમતિ પ્રાપ્ત (Consent Verified)
+                </span>
+              </div>
+            )}
+
             {/* Audio Recording & Original Voice Transcript */}
             <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200/60 space-y-3">
               <div className="flex items-center justify-between">

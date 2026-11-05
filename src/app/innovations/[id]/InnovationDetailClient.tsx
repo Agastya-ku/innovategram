@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import { useInnovations } from '@/context/InnovationsContext';
 import { Language } from '@/types/innovategram';
+import { AudioInstructionButton } from '@/components/AudioInstructionButton';
 import {
   Volume2,
   MapPin,
@@ -176,6 +177,20 @@ export default function InnovationDetailPage() {
           </div>
         </div>
 
+        {/* Assisted submission attribution */}
+        {innovation.registrationType === 'assisted' && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-950 flex items-center justify-between">
+            <div>
+              <span>મૂળ શોધક / Innovator: <strong>{innovation.innovatorName}</strong></span>
+              <span className="mx-2">•</span>
+              <span>સહાયક નોંધણી / Documented by: <strong>{innovation.submitterName}</strong> ({innovation.submitterRelationship})</span>
+            </div>
+            <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded">
+              Assisted Submission
+            </span>
+          </div>
+        )}
+
         {/* Language Tabs for Content Viewing */}
         <div className="flex items-center gap-2 border-b border-emerald-900/10 pb-2">
           <span className="text-[11px] font-bold text-[#6B756E] uppercase tracking-wider mr-1">
@@ -210,18 +225,30 @@ export default function InnovationDetailPage() {
         {/* Problem and Solution */}
         <div className="space-y-4">
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-1.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B756E]">
-              {t('fieldProblem')}
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B756E]">
+                {t('fieldProblem')}
+              </h3>
+              <AudioInstructionButton
+                text={innovation.problem[viewLang] || innovation.problem.en}
+                size="xs"
+              />
+            </div>
             <p className="text-sm text-[#18251E] leading-relaxed">
               {innovation.problem[viewLang] || innovation.problem.en}
             </p>
           </div>
 
           <div className="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200/50 space-y-1.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#104C35]">
-              {t('fieldSolution')}
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#104C35]">
+                {t('fieldSolution')}
+              </h3>
+              <AudioInstructionButton
+                text={innovation.solution[viewLang] || innovation.solution.en}
+                size="xs"
+              />
+            </div>
             <p className="text-sm text-[#18251E] leading-relaxed">
               {innovation.solution[viewLang] || innovation.solution.en}
             </p>

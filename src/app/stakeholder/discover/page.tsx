@@ -350,6 +350,11 @@ export default function DiscoverInnovationsPage() {
                     <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                       Orig: {item.originalLanguage.toUpperCase()}
                     </span>
+                    {item.registrationType === 'assisted' && (
+                      <span className="text-[10px] font-semibold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded">
+                        Assisted
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

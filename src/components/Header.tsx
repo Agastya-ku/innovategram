@@ -31,9 +31,9 @@ export const Header: React.FC = () => {
   const isAdmin = pathname.startsWith('/admin');
 
   const languages: { code: Language; label: string; script: string }[] = [
-    { code: 'en', label: 'English', script: 'EN' },
+    { code: 'gu', label: 'ગુજરાતી', script: 'GU' },
     { code: 'hi', label: 'हिन्दी', script: 'HI' },
-    { code: 'gu', label: 'ગુજરાતી', script: 'GU' }
+    { code: 'en', label: 'English', script: 'EN' }
   ];
 
   return (
