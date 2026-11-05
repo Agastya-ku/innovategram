@@ -1,5 +1,14 @@
 import { Language, Sector, Stage, VerificationStatus } from '@/types/innovategram';
 
+export type StakeholderRole =
+  | 'Government departments'
+  | 'Incubators'
+  | 'Universities'
+  | 'NGOs'
+  | 'Startups'
+  | 'Manufacturers'
+  | 'Research institutions';
+
 export const translations = {
   // Brand & General
   brandName: {
@@ -10,7 +19,7 @@ export const translations = {
   tagline: {
     en: 'AI-Powered Grassroots & Rural Innovation Discovery Platform',
     hi: 'एआई-संचालित ग्रामीण एवं जमीनी नवाचार खोज मंच',
-    gu: 'એઆઈ-આધારિત ગ્રામીણ અને પાયાના આવિષ્કારોનું પ્લેટફોર્મ'
+    gu: 'એઆઈ-આધારિત ગ્રામીણ અને પાયાના આવિષ્કારોનું રાષ્ટ્રીય મંચ'
   },
   portalInnovator: {
     en: 'Innovator Portal',
@@ -28,11 +37,38 @@ export const translations = {
     gu: 'એડમિન પોર્ટલ'
   },
 
+  // Audio Buttons & Controls
+  audioLabel: {
+    en: 'Audio',
+    hi: 'ऑडियो',
+    gu: 'ઓડિયો'
+  },
+  audioPlaying: {
+    en: 'Playing...',
+    hi: 'चल रहा है...',
+    gu: 'સાંભળી રહ્યા છો...'
+  },
+  audioListen: {
+    en: 'Listen',
+    hi: 'सुनें',
+    gu: 'સાંભળો'
+  },
+
   // 1. First Impression & Homepage Purpose
+  homepageHeroHeadline: {
+    en: 'Have you created something that solves a problem in your village or community?',
+    hi: 'क्या आपने अपने गांव या समुदाय की किसी समस्या को हल करने के लिए कुछ नया बनाया है?',
+    gu: 'શું તમે તમારા ગામ કે વિસ્તારની કોઈ સમસ્યા દૂર કરવા માટે કંઈક નવું બનાવ્યું છે?'
+  },
   homepagePurpose: {
     en: 'Have you created something that solves a problem in your village or community? Share your innovation with us. Speak in your own language, upload a photo or make a video. We help connect your idea with the right people and organizations.',
     hi: 'क्या आपने अपने गांव या समुदाय की किसी समस्या को हल करने के लिए कुछ नया बनाया है? अपने नवाचार को हमारे साथ साझा करें। अपनी भाषा में बोलें, फोटो अपलोड करें या वीडियो बनाएं। हम आपके विचार को सही लोगों और संस्थाओं से जोड़ने में मदद करते हैं।',
     gu: 'શું તમે તમારા ગામ કે વિસ્તારની કોઈ સમસ્યા દૂર કરવા માટે કંઈક નવું બનાવ્યું છે? તમારો આવિષ્કાર અમારી સાથે શેર કરો. તમારી પોતાની ભાષામાં બોલો, ફોટો લો અથવા વીડિયો બનાવો. અમે તમારા વિચારને યોગ્ય સંસ્થાઓ અને સહાયકો સાથે જોડીશું.'
+  },
+  homepageHeroSubtitle: {
+    en: 'Share your innovation with us. Speak in your own language, upload a photo or make a video. We help connect your idea with the right people and organizations.',
+    hi: 'अपने नवाचार को हमारे साथ साझा करें। अपनी भाषा में बोलें, फोटो अपलोड करें या वीडियो बनाएं। हम आपके विचार को सही लोगों और संस्थाओं से जोड़ने में मदद करते हैं।',
+    gu: 'તમારો આવિષ્કાર અમારી સાથે શેર કરો. તમારી પોતાની ભાષામાં બોલો, ફોટો લો અથવા વીડિયો બનાવો. અમે તમારા વિચારને યોગ્ય લોકો અને સંસ્થાઓ સાથે જોડીશું.'
   },
   shareInnovationBtn: {
     en: 'Share Your Innovation',
@@ -50,11 +86,265 @@ export const translations = {
     gu: 'ઇન્ટરેક્ટિવ નકશો'
   },
 
+  // Voice Instructions for Requirements
+  voiceInstructionHome: {
+    en: 'Press this button and tell us about your invention.',
+    hi: 'यह बटन दबाएं और हमें अपने आविष्कार के बारे में बताएं।',
+    gu: 'આ બટન દબાવો અને તમારી નવીનતા વિશે અમને જણાવો.'
+  },
+  voiceInstructionSubmission: {
+    en: 'Please explain what you created and what problem it solves.',
+    hi: 'कृपया समझाएं कि आपने क्या बनाया है और यह किस समस्या का समाधान करता है।',
+    gu: 'કૃપા કરીને સમજાવો કે તમે શું બનાવ્યું છે અને તે કઈ સમસ્યાનું નિરાકરણ કરે છે.'
+  },
+  voiceInstructionPhoto: {
+    en: 'Take a photograph of your invention.',
+    hi: 'अपने आविष्कार की तस्वीर लें।',
+    gu: 'તમારા આવિષ્કારનો ફોટો લો.'
+  },
+  voiceInstructionLocation: {
+    en: 'Select your village or allow us to identify your location.',
+    hi: 'अपना गांव चुनें या हमें अपना स्थान पहचानने की अनुमति दें।',
+    gu: 'તમારું ગામ પસંદ કરો અથવા અમને તમારું સ્થાન શોધવાની મંજૂરી આપો.'
+  },
+  voiceInstructionConfirmation: {
+    en: 'Listen to the information and tell us whether it is correct.',
+    hi: 'जानकारी सुनें और हमें बताएं कि क्या यह सही है।',
+    gu: 'માહિતી સાંભળો અને અમને જણાવો કે શું તે સાચી છે.'
+  },
+  voiceInstructionSuccess: {
+    en: 'Your innovation has been submitted successfully.',
+    hi: 'आपका नवाचार सफलतापूर्वक जमा कर दिया गया है।',
+    gu: 'તમારો આવિષ્કાર સફળતાપૂર્વક સબમિટ કરવામાં આવ્યો છે.'
+  },
+
+  // Innovator Portal UI & Labels
+  innovatorPortalBadge: {
+    en: 'Voice-First Grassroots Platform',
+    hi: 'ध्वनि-प्रथम ग्रामीण मंच',
+    gu: 'વોઇસ-ફર્સ્ટ ગ્રામીણ મંચ'
+  },
+  innovatorPortalTagline: {
+    en: 'Simple, voice-assisted, 0% paperwork',
+    hi: 'सरल, ध्वनि-आधारित, 0% कागजी कार्रवाई',
+    gu: 'સરળ, વોઇસ-આધારિત, 0% કાગળિયા'
+  },
+  pathwayTabSelf: {
+    en: 'Option A: For Myself',
+    hi: 'विकल्प A: स्वयं के लिए',
+    gu: 'ઓપ્શન A: પોતાના માટે'
+  },
+  pathwayTabAssisted: {
+    en: 'Option B: For Someone Else',
+    hi: 'विकल्प B: किसी अन्य के लिए',
+    gu: 'ઓપ્શન B: અન્ય વતી'
+  },
+  speakAllInOne: {
+    en: 'Speak everything in one recording',
+    hi: 'एक ही बार में पूरी बात बोलें',
+    gu: 'એકસાથે સંપૂર્ણ વાત બોલો'
+  },
+  conversationalOptionTitle: {
+    en: 'Voice Q&A Assistant',
+    hi: 'सवाल-जवाब सहायक (Voice Q&A)',
+    gu: 'સવાલ-જવાબ સહાયક (Voice Q&A)'
+  },
+  conversationalOptionDesc: {
+    en: 'Answer simple questions one by one',
+    hi: 'एक-एक करके प्रश्नों का उत्तर दें',
+    gu: 'એક પછી એક સવાલનો જવાબ આપો'
+  },
+  orText: {
+    en: 'OR',
+    hi: 'या',
+    gu: 'અથવા'
+  },
+  orStartMedia: {
+    en: 'Or start by adding photos and videos',
+    hi: 'या फोटो और वीडियो जोड़कर शुरू करें',
+    gu: 'અથવા ફોટો અને વીડિયો દ્વારા શરૂ કરો'
+  },
+  nextPhotoVideo: {
+    en: 'Next: Photos & Videos →',
+    hi: 'आगे: फोटो और वीडियो →',
+    gu: 'આગળ: ફોટો અને વીડિયો →'
+  },
+  nextLocation: {
+    en: 'Next: Select Location →',
+    hi: 'आगे: स्थान चुनें →',
+    gu: 'આગળ: સ્થળ પસંદ કરો →'
+  },
+  backAudio: {
+    en: '← Back (Audio)',
+    hi: '← पीछे (आवाज़)',
+    gu: '← પાછળ (અવાજ)'
+  },
+  backMedia: {
+    en: '← Back (Media)',
+    hi: '← पीछे (मीडिया)',
+    gu: '← પાછળ (મીડિયા)'
+  },
+  backLocation: {
+    en: '← Back (Location)',
+    hi: '← पीछे (स्थान)',
+    gu: '← પાછળ (સ્થળ)'
+  },
+  aiAnalyzing: {
+    en: 'AI Engine is analyzing your voice and details...',
+    hi: 'एआई इंजन आपकी आवाज़ और जानकारी का विश्लेषण कर रहा है...',
+    gu: 'AI એન્જિન તમારા અવાજ અને વિગતોનું વિશ્લેષણ કરી રહ્યું છે...'
+  },
+  aiAnalyzingDesc: {
+    en: 'Audio transcription, language detection, problem extraction, and 3-language translation.',
+    hi: 'ध्वनि प्रतिलिपि, भाषा पहचान, समस्या निष्कर्षण और 3 भाषाओं में अनुवाद।',
+    gu: 'ઓડિયો ટ્રાન્સક્રિપ્શન, ભાષા ઓળખ, સમસ્યા અને ઉપાય તારવણી તથા ૩ ભાષાઓમાં રૂપાંતર.'
+  },
+  submittingText: {
+    en: 'Submitting...',
+    hi: 'जमा हो रहा है...',
+    gu: 'સબમિટ થઈ રહ્યું છે...'
+  },
+  keepIdNotice: {
+    en: 'Keep this ID to track evaluation status or recover your record.',
+    hi: 'मूल्यांकन स्थिति जांचने या रिकॉर्ड प्राप्त करने के लिए यह आईडी सुरक्षित रखें।',
+    gu: 'આ ID સાચવી રાખો. ભવિષ્યમાં સ્ટેટસ ચેક કરવા કે સહાય મેળવવા માટે આ નંબર જરૂરી રહેશે.'
+  },
+  selectLanguagePrompt: {
+    en: 'Language:',
+    hi: 'भाषा:',
+    gu: 'ભાષા:'
+  },
+  platformTaglineShort: {
+    en: 'Grassroots Invention • National Platform',
+    hi: 'ग्रामीण खोज • राष्ट्रीय मंच',
+    gu: 'ગામડાની શોધ • રાષ્ટ્રીય મંચ'
+  },
+  zeroFee: {
+    en: '0% Application Fee',
+    hi: '0% फॉर्म फीस',
+    gu: '0% ફોર્મ ફી'
+  },
+  optionAPreviewDesc: {
+    en: 'I created this myself',
+    hi: 'मैंने इसे स्वयं बनाया है',
+    gu: 'મેં જાતે બનાવ્યું છે'
+  },
+  optionBPreviewDesc: {
+    en: 'Helping someone else',
+    hi: 'किसी अन्य की मदद कर रहे हैं',
+    gu: 'અન્ય વ્યક્તિ વતી મદદ'
+  },
+  sectorsCataloged: {
+    en: 'Sectors Cataloged',
+    hi: 'वर्गीकृत क्षेत्र',
+    gu: 'ક્ષેત્રો (Sectors)'
+  },
+  statesRepresented: {
+    en: 'States Represented',
+    hi: 'प्रतिनिधित्व वाले राज्य',
+    gu: 'રાજ્યો (States)'
+  },
+  viewAllInnovations: {
+    en: 'View all innovations',
+    hi: 'सभी नवाचार देखें',
+    gu: 'બધા આવિષ્કારો જુઓ'
+  },
+  verifiedInnovationsTitle: {
+    en: 'Verified Grassroots Inventions',
+    hi: 'सत्यापित जमीनी नवाचार',
+    gu: 'ચકાસાયેલ પાયાના આવિષ્કારો'
+  },
+  recentInnovationsTitle: {
+    en: 'Recent Rural Inventions',
+    hi: 'हाल के ग्रामीण नवाचार',
+    gu: 'તાજેતરના ગ્રામીણ આવિષ્કારો'
+  },
+  ctaInnovatorsBanner: {
+    en: 'For Innovators & Community Helpers',
+    hi: 'नवाचारकर्ताओं और सहायकों के लिए',
+    gu: 'આવિષ્કારકો અને સહાયકો માટે'
+  },
+  ctaHeadline: {
+    en: 'Bring your village or community innovation to national attention',
+    hi: 'अपने गांव या क्षेत्र के नवाचार को राष्ट्रीय पटल पर लाएं',
+    gu: 'તમારા ગામ કે તાલુકાના આવિષ્કારને દેશ સમક્ષ લાવો'
+  },
+  ctaDesc: {
+    en: 'Whether you created a tool yourself or you are assisting a local farmer or artisan, both pathways are supported.',
+    hi: 'चाहे आपने कोई उपकरण स्वयं बनाया हो या आप किसी अन्य किसान या कारीगर की मदद कर रहे हों, दोनों रास्ते उपलब्ध हैं।',
+    gu: 'તમે જાતે બનાવેલું સાધન હોય અથવા તમે કોઈ અન્ય ખેડૂત, મિકેનિક કે કારીગરની મદદ કરતા હોવ, બંને રીતે નોંધણી શક્ય છે.'
+  },
+  choosePathwayTitle: {
+    en: 'Select Submission Pathway',
+    hi: 'पंजीकरण का प्रकार चुनें',
+    gu: 'નોંધણીનો પ્રકાર પસંદ કરો'
+  },
+  optionAHelperText: {
+    en: 'Direct and simple submission using your voice.',
+    hi: 'अपनी आवाज़ से सरल और सीधी प्रस्तुति।',
+    gu: 'તમારા અવાજ દ્વારા સરળ રીતે સીધી નોંધણી કરો.'
+  },
+  optionBHelperText: {
+    en: 'Assist as a volunteer, family member, NGO worker, or teacher.',
+    hi: 'स्वयंसेवक, परिवारजन, एनजीओ या शिक्षक के रूप में सहायता करें।',
+    gu: 'સ્વયંસેવક, પરિવારજન, NGO અથવા શિક્ષક તરીકે અન્યને સહાય કરો.'
+  },
+  proceedBtn: {
+    en: 'Proceed (Go to Form)',
+    hi: 'आगे बढ़ें',
+    gu: 'આગળ વધો'
+  },
+  assistedBtn: {
+    en: 'Assisted Submission',
+    hi: 'सहायक पंजीकरण',
+    gu: 'સહાયક નોંધણી'
+  },
+  stepWord: {
+    en: 'Step',
+    hi: 'कदम',
+    gu: 'પગલું'
+  },
+  questionWord: {
+    en: 'Question',
+    hi: 'प्रश्न',
+    gu: 'સવાલ'
+  },
+  yourAnswerLabel: {
+    en: 'Your Answer (AI Extracted):',
+    hi: 'आपका उत्तर (एआई द्वारा निकाला गया):',
+    gu: 'તમારો જવાબ (AI તારવેલ વિગત):'
+  },
+  answerConfirmHint: {
+    en: 'If the answer is correct, click Confirm & Next Question',
+    hi: 'यदि उत्तर सही है, तो पुष्टि करें और आगे बढ़ें पर क्लिक करें',
+    gu: 'જવાબ યોગ્ય હોય તો "ખાતરી કરી આગળ વધો" દબાવો'
+  },
+  micSpeakPrompt: {
+    en: 'Tap mic and speak naturally in English, Hindi, or Gujarati',
+    hi: 'माइक पर टैप करें और अंग्रेजी, हिन्दी या गुजराती में बोलें',
+    gu: 'માઇક પર ટેપ કરો અને ગુજરાતી, હિન્દી કે અંગ્રેજીમાં બોલો'
+  },
+  sampleSpeechListen: {
+    en: '💡 Listen to sample voice input',
+    hi: '💡 नमूना आवाज़ सुनें / टेस्ट करें',
+    gu: '💡 ઉદાહરણ અવાજ સાંભળો / સિમ્યુલેટ કરો'
+  },
+  fullProcessLink: {
+    en: 'View full illustrated process →',
+    hi: 'पूरी सचित्र प्रक्रिया देखें →',
+    gu: 'સંપૂર્ણ ચિત્રાત્મક પ્રક્રિયા જુઓ →'
+  },
+  approxCoordsNote: {
+    en: 'Approximate Village Coordinates Displayed',
+    hi: 'अनुमानित गांव के निर्देशांक प्रदर्शित',
+    gu: 'અંદાજિત ગામના નિર્દેશાંક દર્શાવેલ છે'
+  },
+
   // 2. Infographic Steps
   infographicBadge: {
-    en: 'Visual Innovation Journey',
-    hi: 'चित्रमय नवाचार यात्रा',
-    gu: 'ચિત્રાત્મક પ્રક્રિયા પ્રવાસ'
+    en: '5-Step Visual Innovation Journey',
+    hi: '5-चरणीय सचित्र नवाचार यात्रा',
+    gu: '૫-પગલાંની ચિત્રાત્મક પ્રક્રિયા પ્રવાસ'
   },
   infographicTitle: {
     en: 'How InnovateGram Works',
@@ -72,8 +362,8 @@ export const translations = {
     gu: '1. તમારો વિચાર રજૂ કરો'
   },
   step1Desc: {
-    en: 'Speak naturally into the microphone or upload a photo of your working model in your language.',
-    hi: 'माइक में अपनी भाषा में बोलें या अपनी मशीन या मॉडल की तस्वीर खींचकर अपलोड करें।',
+    en: 'A person speaking into a microphone or uploading a photograph of their invention.',
+    hi: 'माइक में अपनी भाषा में बोलें या अपने आविष्कार की तस्वीर अपलोड करें।',
     gu: 'માઇકમાં તમારી માતૃભાષામાં બોલો અથવા તમારા મશીન કે સાધનની તસવીર અપલોડ કરો.'
   },
   step2Title: {
@@ -82,9 +372,9 @@ export const translations = {
     gu: '2. AI તમારો વિચાર સમજે છે'
   },
   step2Desc: {
-    en: 'AI transcribes voice, extracts the problem and solution, and translates it across languages.',
-    hi: 'एआई आपकी आवाज़ सुनकर समस्या और उपाय को पहचानता है और 3 भाषाओं में व्यवस्थित करता है।',
-    gu: 'AI તમારા અવાજને સમજીને સમસ્યા અને ઉપાય તારવે છે તથા ૩ ભાષાઓમાં રૂપાંતરિત કરે છે.'
+    en: 'AI converts voice, images, and videos into structured information and multilingual profiles.',
+    hi: 'एआई आवाज़, फोटो और वीडियो को समझकर व्यवस्थित जानकारी और 3 भाषाओं में विवरण बनाता है।',
+    gu: 'AI તમારા અવાજ, ફોટો અને વીડિયોને સમજીને વ્યવસ્થિત માહિતી અને ૩ ભાષાઓમાં પ્રોફાઇલ બનાવે છે.'
   },
   step3Title: {
     en: '3. Innovation Is Organized',
@@ -92,19 +382,19 @@ export const translations = {
     gu: '3. માહિતી વ્યવસ્થિત ગોઠવાય છે'
   },
   step3Desc: {
-    en: 'Structured classification into sector, maturity stage, village coordinates, and verified safety.',
-    hi: 'क्षेत्र (कृषि, ऊर्जा), विकास चरण, गांव और पहचान संख्या (ID) के साथ प्रोफ़ाइल तैयार होती है।',
-    gu: 'ક્ષેત્ર (ખેતી, ઊર્જા), તબક્કો, ગામ અને ઓળખ નંબર સાથે સુરક્ષિત પ્રોફાઇલ બને છે.'
+    en: 'Automatic classification into sector, problem, location, and development-stage.',
+    hi: 'क्षेत्र (कृषि, ऊर्जा), समस्या, स्थान और विकास चरण के अनुसार स्वचालित वर्गीकरण।',
+    gu: 'ક્ષેત્ર (ખેતી, પાણી, ઊર્જા), સમસ્યા, સ્થળ અને વિકાસ તબક્કા અનુસાર વર્ગીકરણ.'
   },
   step4Title: {
-    en: '4. Discover on Geographic Map',
-    hi: '4. नक्शे पर खोज योग्य बनता है',
-    gu: '4. નકશા પર જોઈ શકાય છે'
+    en: '4. Discover Your Innovation',
+    hi: '4. नवाचार नक्शे पर खोज योग्य बनता है',
+    gu: '4. નકશા પર તમારો આવિષ્કાર દેખાય છે'
   },
   step4Desc: {
-    en: 'Innovations appear on the interactive map of India for researchers, incubators, and investors.',
-    hi: 'आपका आविष्कार भारत के डिजिटल नक्शे पर दर्ज होता है जिससे विशेषज्ञ इसे आसानी से खोज सकें।',
-    gu: 'તમારો આવિષ્કાર ભારતના ડિજિટલ નકશા પર દર્શાવાય છે જેથી સંસ્થાઓ તેને સરળતાથી શોધી શકે.'
+    en: 'Innovations appear on a searchable geographic map with state and village filters.',
+    hi: 'आविष्कार खोज योग्य भौगोलिक नक्शे पर दिखाई देते हैं जिसे राज्य और जिले से खोजा जा सकता है।',
+    gu: 'આવિષ્કારો સર્ચ કરી શકાય તેવા ભૌગોલિક નકશા પર રાજ્ય, જિલ્લો અને ગામ મુજબ દેખાય છે.'
   },
   step5Title: {
     en: '5. Connect With Opportunities',
@@ -112,15 +402,15 @@ export const translations = {
     gu: '5. તકો અને સંસ્થાઓ સાથે જોડાઓ'
   },
   step5Desc: {
-    en: 'Government departments, universities, and incubators request contact to provide grants and scaling.',
-    hi: 'सरकारी विभाग, इनक्यूबेटर और विश्वविद्यालय संपर्क की अनुमति लेकर मदद और अनुदान प्रदान करते हैं।',
-    gu: 'સરકારી વિભાગો, યુનિવર્સિટીઓ અને ઇનક્યુબેટર સહાય, અનુદાન અને મશીન બનાવવા માટે જોડાય છે.'
+    en: 'Government departments, incubators, and universities discover innovations and support scaling.',
+    hi: 'सरकारी विभाग, इनक्यूबेटर और विश्वविद्यालय नवाचारों को खोजकर अनुदान और तकनीकी सहायता देते हैं।',
+    gu: 'સરકારી વિભાગો, ઇનક્યુબેટર અને યુનિવર્સિટીઓ આવિષ્કારો શોધીને સહાય, અનુદાન અને આગળ વધારવામાં મદદ કરે છે.'
   },
 
   // 3. Two Registration Pathways
   pathwayTitle: {
     en: 'Who are you submitting this innovation for?',
-    hi: 'आप यह नवाचार किसके लिए जमा कर रहे हैं?',
+    hi: 'आप यह नवाचार किसके लिए साझा कर रहे हैं?',
     gu: 'તમે આ આવિષ્કાર કોના માટે સબમિટ કરી રહ્યા છો?'
   },
   pathwaySubtitle: {
@@ -129,9 +419,9 @@ export const translations = {
     gu: 'પસંદ કરો કે શું તમે પોતે આ શોધ કરી છે, અથવા તમે તમારા ગામના કોઈ અન્ય વ્યક્તિની મદદ કરી રહ્યા છો.'
   },
   pathwayOptionA_Title: {
-    en: 'Register for Myself',
-    hi: 'स्वयं के लिए पंजीकरण',
-    gu: 'પોતાના માટે રજીસ્ટ્રેશન'
+    en: 'OPTION A: REGISTER FOR MYSELF',
+    hi: 'विकल्प A: स्वयं के लिए पंजीकरण',
+    gu: 'ઓપ્શન A: પોતાના માટે રજીસ્ટ્રેશન'
   },
   pathwayOptionA_Desc: {
     en: 'I am the person who created this innovation.',
@@ -139,9 +429,9 @@ export const translations = {
     gu: 'મેં આ નવીનતા પોતે બનાવી છે.'
   },
   pathwayOptionB_Title: {
-    en: 'Register for Someone Else',
-    hi: 'किसी अन्य व्यक्ति के लिए पंजीकरण',
-    gu: 'અન્ય વ્યક્તિ વતી રજીસ્ટ્રેશન'
+    en: 'OPTION B: REGISTER FOR SOMEONE ELSE',
+    hi: 'विकल्प B: किसी अन्य व्यक्ति के लिए पंजीकरण',
+    gu: 'ઓપ્શન B: અન્ય વ્યક્તિ વતી રજીસ્ટ્રેશન'
   },
   pathwayOptionB_Desc: {
     en: 'I am helping someone share their innovation.',
@@ -151,69 +441,54 @@ export const translations = {
   helperNotice: {
     en: 'Assisted Submission Mode: You are documenting this on behalf of the creator. The inventor will remain the credited innovator.',
     hi: 'सहायता आधारित प्रस्तुति: आप मूल आविष्कारक की ओर से जानकारी दर्ज कर रहे हैं। श्रेय और अधिकार केवल मूल आविष्कारक को मिलेंगे।',
-    gu: 'સહાયક મોડ: તમે મૂળ આવિષ્કારક વતી માહિતી ભરી રહ્યા છો. આવિષ્કારનો યશ અને હક ફક્ત મૂળ શોધકનો રહેશે.'
+    gu: 'સહાયક મોડ: તમે મૂળ શોધક વતી માહિતી ભરી રહ્યા છો. શોધનો યશ અને હક ફક્ત મૂળ આવિષ્કારકનો રહેશે.'
   },
   fieldSubmitterName: {
-    en: 'Your Name (Helper / Volunteer)',
-    hi: 'आपका नाम (मददगार / स्वयंसेवक)',
-    gu: 'તમારું નામ (મદદગાર / સ્વયંસેવક)'
+    en: 'Person Submitting the Innovation (Your Name)',
+    hi: 'नवाचार जमा करने वाला व्यक्ति (आपका नाम)',
+    gu: 'આવિષ્કાર સબમિટ કરનાર વ્યક્તિ (તમારું નામ)'
   },
   fieldSubmitterRole: {
-    en: 'Your Relationship with the Innovator',
+    en: 'Relationship with the Innovator',
     hi: 'आविष्कारक के साथ आपका संबंध',
-    gu: 'આવિષ્કારક સાથે તમારો સંબંધ'
+    gu: 'આવિષ્કારક સાથે સંબંધ'
   },
   fieldActualInventorName: {
-    en: 'Actual Innovator / Inventor Name',
-    hi: 'मूल आविष्कारक का नाम',
-    gu: 'મૂળ આવિષ્કારકનું નામ'
+    en: "Actual Innovator's Name (if known)",
+    hi: 'मूल आविष्कारक का नाम (यदि ज्ञात हो)',
+    gu: 'મૂળ આવિષ્કારકનું નામ (જો જાણીતું હોય)'
+  },
+  fieldInnovatorLocation: {
+    en: "Innovator's Village or Location",
+    hi: 'आविष्कारक का गांव या स्थान',
+    gu: 'આવિષ્કારકનું ગામ અથવા સ્થળ'
+  },
+  fieldOptionalContact: {
+    en: 'Optional Contact Details (Helper phone)',
+    hi: 'वैकल्पिक संपर्क विवरण (सहायक का फोन)',
+    gu: 'વૈકલ્પિક સંપર્ક વિગતો (સહાયકનો ફોન)'
   },
   fieldConsentCheckbox: {
-    en: 'I confirm that the actual inventor has given consent to document and share this innovation on InnovateGram.',
-    hi: 'मैं पुष्टि करता हूँ कि मूल आविष्कारक ने इस नवाचार को इनोवेटग्राम पर दर्ज करने की सहमति दी है।',
-    gu: 'હું ખાતરી આપું છું કે મૂળ આવિષ્કારકે આ નવીનતાને ઇનોવેટગ્રામ પર રજૂ કરવાની સંમતિ આપી છે.'
+    en: 'I confirm that I have obtained appropriate consent from the inventor before submitting their innovation details.',
+    hi: 'मैं पुष्टि करता हूँ कि इस नवाचार की जानकारी साझा करने से पहले मूल आविष्कारक से उचित सहमति प्राप्त कर ली गई है।',
+    gu: 'હું ખાતરી આપું છું કે આ માહિતી સબમિટ કરતા પહેલાં મેં મૂળ શોધકની યોગ્ય સંમતિ મેળવેલ છે.'
+  },
+  noDocumentsRequiredNote: {
+    en: 'No company registration, GST, Aadhaar or institutional affiliation required.',
+    hi: 'कंपनी पंजीकरण, जीएसटी, आधार कार्ड या संस्थागत संबद्धता की कोई आवश्यकता नहीं है।',
+    gu: 'કોઈપણ કંપની રજીસ્ટ્રેશન, GST, આધાર કાર્ડ કે સંસ્થાકીય જોડાણની જરૂર નથી.'
   },
 
   // 6. Conversational Voice Assistant
   conversationalTitle: {
     en: 'Voice-Assisted Conversational Form',
     hi: 'आवाज़ द्वारा संवादात्मक फॉर्म',
-    gu: 'વોઇસ આસિસ્ટન્ટ સાથે વાતચીત દ્વારા ફોર્મ'
+    gu: 'વાતચીત દ્વારા વોઇસ ફોર્મ'
   },
   conversationalSubtitle: {
-    en: 'Answer simple questions verbally or by typing. Our AI fills and structures the innovation profile for you.',
-    hi: 'सवालों के जवाब बोलकर या लिखकर दें। हमारा एआई आपके लिए सही जानकारी तैयार करेगा।',
-    gu: 'સવાલોના જવાબ બોલીને અથવા ટાઇપ કરીને આપો. અમારું AI તમારા માટે સાચી વિગતો તૈયાર કરશે.'
-  },
-  q1: {
-    en: 'What is your name (or the innovator’s name)?',
-    hi: 'आपका नाम (या आविष्कारक का नाम) क्या है?',
-    gu: 'તમારું નામ (અથવા આવિષ્કારકનું નામ) શું છે?'
-  },
-  q2: {
-    en: 'What have you created?',
-    hi: 'आपने क्या नया बनाया है?',
-    gu: 'તમે શું નવું બનાવ્યું છે?'
-  },
-  q3: {
-    en: 'What problem does your invention solve in your village or farm?',
-    hi: 'आपका आविष्कार किस समस्या को हल करता है?',
-    gu: 'તમારો આવિષ્કાર કઈ સમસ્યા દૂર કરે છે?'
-  },
-  q4: {
-    en: 'How does it work, and what materials or mechanism did you use?',
-    hi: 'यह कैसे काम करता है और आपने इसमें क्या पुर्जे इस्तेमाल किए हैं?',
-    gu: 'આ કઈ રીતે કામ કરે છે અને તેમાં કયા સાધનો વાપર્યા છે?'
-  },
-  q5: {
-    en: 'Which village, district and state are you from?',
-    hi: 'आप किस गांव, जिले और राज्य से हैं?',
-    gu: 'તમે કયા ગામ, જિલ્લા અને રાજ્યના છો?'
-  },
-  q6: {
-    en: 'What is the current development stage of this invention?',
-    hi: 'वर्तमान में यह किस चरण में है?',
-    gu: 'હાલમાં આ આવિષ્કાર કયા તબક્કે છે?'
+    en: 'Answer simple questions verbally or by typing. AI populates the structured database fields.',
+    hi: 'सवालों के जवाब बोलकर या लिखकर दें। एआई सीधे डेटाबेस फ़ील्ड भरेगा।',
+    gu: 'સવાલોના જવાબ બોલીને અથવા ટાઇપ કરીને આપો. AI સીધા ડેટાબેઝ ખાના ભરશે.'
   },
   speakAnswerBtn: {
     en: 'Speak Answer',
@@ -225,10 +500,20 @@ export const translations = {
     hi: 'लिखकर उत्तर दें',
     gu: 'લખીને જવાબ આપો'
   },
+  selectOptionBtn: {
+    en: 'Select from Options',
+    hi: 'विकल्पों में से चुनें',
+    gu: 'વિકલ્પોમાંથી પસંદ કરો'
+  },
+  skipQuestionBtn: {
+    en: 'Skip this question',
+    hi: 'यह प्रश्न छोड़ें',
+    gu: 'આ સવાલ છોડો'
+  },
   nextQuestionBtn: {
-    en: 'Next Question',
-    hi: 'अगला प्रश्न',
-    gu: 'આગળનો પ્રશ્ન'
+    en: 'Confirm & Next Question',
+    hi: 'पुष्टि करें और अगला प्रश्न',
+    gu: 'ખાતરી કરી આગળ વધો'
   },
   prevQuestionBtn: {
     en: 'Previous Question',
@@ -248,9 +533,9 @@ export const translations = {
     gu: 'શું તમે કંઈક નવું બનાવ્યું છે?'
   },
   innovatorWelcomeSubtitle: {
-    en: 'Tell us about your invention. You can speak, take a photo or record a video. We will organize everything for you.',
-    hi: 'अपने आविष्कार के बारे में हमें बताएं। आप बोलकर, फोटो खींचकर या वीडियो बनाकर जानकारी दे सकते हैं।',
-    gu: 'તમારા આવિષ્કાર વિશે અમને જણાવો. તમે બોલીને, ફોટો લઈને અથવા વીડિયો બનાવીને માહિતી આપી શકો છો.'
+    en: 'Tell us about your invention. Speak in your own language, take a photo or record a video. We organize everything for you.',
+    hi: 'अपने आविष्कार के बारे में बताएं। अपनी भाषा में बोलें, फोटो लें या वीडियो बनाएं। हम आपके लिए सब व्यवस्थित करेंगे।',
+    gu: 'તમારા આવિષ્કાર વિશે જણાવો. તમારી ભાષામાં બોલો, ફોટો લો અથવા વીડિયો બનાવો. અમે બધું વ્યવસ્થિત કરી આપીશું.'
   },
   voiceRecordBtn: {
     en: 'Speak to Submit (Voice)',
@@ -317,14 +602,14 @@ export const translations = {
     gu: 'આ આવિષ્કાર કયા વિસ્તારમાં બન્યો છે?'
   },
   locationSubtitle: {
-    en: 'We only show the village/district level for your privacy.',
-    hi: 'आपकी सुरक्षा के लिए केवल गांव और जिले का नाम दिखाया जाएगा।',
-    gu: 'તમારી સુરક્ષા માટે ફક્ત ગામ અને જિલ્લાનું નામ જ દર્શાવવામાં આવશે.'
+    en: 'Select your village or allow us to identify your location. GPS is optional.',
+    hi: 'अपना गांव चुनें या स्थान पहचानने दें। जीपीएस वैकल्पिक है।',
+    gu: 'તમારું ગામ પસંદ કરો અથવા સ્થાન ઓળખવા દો. જીપીએસ વૈકલ્પિક છે.'
   },
   useGpsBtn: {
-    en: 'Use Current Location',
-    hi: 'वर्तमान स्थान का उपयोग करें',
-    gu: 'હાલનું સ્થાન વાપરો'
+    en: 'Detect Location (Optional GPS)',
+    hi: 'स्थान पहचानें (वैकल्पिक जीपीएस)',
+    gu: 'સ્થાન શોધો (વૈકલ્પિક GPS)'
   },
   selectState: {
     en: 'Select State',
@@ -349,9 +634,9 @@ export const translations = {
     gu: 'તસવીરો અને વીડિયો'
   },
   mediaSubtitle: {
-    en: 'Upload pictures or clips of your machine or working model.',
-    hi: 'अपनी मशीन या मॉडल की फोटो और वीडियो जोड़ें।',
-    gu: 'તમારા મશીન અથવા મોડેલના ફોટો અને વીડિયો ઉમેરો.'
+    en: 'Take a photograph of your invention or record a short video clip.',
+    hi: 'अपने आविष्कार की तस्वीर लें या छोटा वीडियो क्लिप रिकॉर्ड करें।',
+    gu: 'તમારા આવિષ્કારનો ફોટો લો અથવા ટૂંકો વીડિયો રેકોર્ડ કરો.'
   },
   takePhoto: {
     en: 'Take a Photo',
@@ -366,7 +651,7 @@ export const translations = {
   orUploadFiles: {
     en: 'Or choose files from device',
     hi: 'या फोन से फाइल चुनें',
-    gu: 'અથવા ડિવાઇસમાંથી ફાઇલ પસંદ કરો'
+    gu: 'અથવા ફોનમાંથી ફાઇલ પસંદ કરો'
   },
 
   // AI Profile Review
@@ -376,9 +661,9 @@ export const translations = {
     gu: 'એઆઈ દ્વારા તૈયાર કરેલ આવિષ્કાર પ્રોફાઇલ'
   },
   aiVerificationNotice: {
-    en: 'Please verify what our AI understood from your voice and description before confirming.',
-    hi: 'कृपया पुष्टि करें कि क्या हमारे एआई ने आपकी आवाज़ और विवरण को सही समझा है।',
-    gu: 'કૃપા કરીને ખાતરી કરો કે શું અમારા એઆઈએ તમારી વાત બરાબર સમજી છે.'
+    en: 'Please verify what our AI understood from your voice before confirming. Human evaluators will verify it subsequently.',
+    hi: 'कृपया पुष्टि करें कि क्या एआई ने आपकी बात सही समझी है। इसके बाद मानवीय विशेषज्ञ इसकी समीक्षा करेंगे।',
+    gu: 'કૃપા કરીને ખાતરી કરો કે શું એઆઈએ તમારી વાત બરાબર સમજી છે. ત્યારબાદ નિષ્ણાતો તેની સમીક્ષા કરશે.'
   },
   confirmAndSubmit: {
     en: 'Confirm & Submit Innovation',
@@ -391,7 +676,7 @@ export const translations = {
     gu: 'માહિતી સુધારો'
   },
   readAloud: {
-    en: 'Read Aloud (TTS)',
+    en: 'Read Aloud (Audio)',
     hi: 'बोलकर सुनाएं',
     gu: 'બોલીને સંભળાવો'
   },
@@ -404,8 +689,8 @@ export const translations = {
   },
   submissionSuccessSubtitle: {
     en: 'Our ecosystem team and regional evaluators will review it shortly. Save your Innovation ID.',
-    hi: 'हमारी टीम और तकनीकी विशेषज्ञ जल्द ही इसकी समीक्षा करेंगे। अपनी आईडी सुरक्षित रखें।',
-    gu: 'અમારી ટીમ અને તકનીકી નિષ્ણાતો ટૂંક સમયમાં તેની સમીક્ષા કરશે. તમારી આઈડી સાચવો.'
+    hi: 'हमारी टीम और विशेषज्ञ जल्द ही इसकी समीक्षा करेंगे। अपनी आईडी सुरक्षित रखें।',
+    gu: 'અમારી ટીમ અને નિષ્ણાતો ટૂંક સમયમાં તેની સમીક્ષા કરશે. તમારી આઈડી સાચવો.'
   },
   innovationIdLabel: {
     en: 'Innovation ID',
@@ -745,5 +1030,43 @@ export const statusTranslations: Record<VerificationStatus, Record<Language, str
     en: 'Archived',
     hi: 'अस्वीकृत / सुरक्षित',
     gu: 'આર્કાઇવ કરેલ'
+  }
+};
+
+export const stakeholderRoleTranslations: Record<StakeholderRole, Record<Language, string>> = {
+  'Government departments': {
+    en: 'Government Department',
+    hi: 'सरकारी विभाग',
+    gu: 'સરકારી વિભાગ'
+  },
+  Incubators: {
+    en: 'Incubator / Accelerator',
+    hi: 'इनक्यूबेटर / एक्सीलरेटर',
+    gu: 'ઇનક્યુબેટર / એક્સિલરેટર'
+  },
+  Universities: {
+    en: 'University / Academic Institution',
+    hi: 'विश्वविद्यालय / शैक्षणिक संस्थान',
+    gu: 'યુનિવર્સિટી / શૈક્ષણિક સંસ્થા'
+  },
+  NGOs: {
+    en: 'Non-Governmental Organization (NGO)',
+    hi: 'गैर-सरकारी संगठन (एनजीओ)',
+    gu: 'બિન-સરકારી સંગઠન (NGO)'
+  },
+  Startups: {
+    en: 'Startup / Enterprise',
+    hi: 'स्टार्टअप / उद्यम',
+    gu: 'સ્ટાર્ટઅપ / ઉદ્યોગ'
+  },
+  Manufacturers: {
+    en: 'Manufacturer / Fabricator',
+    hi: 'निर्माता / फैब्रिकेटर',
+    gu: 'ઉત્પાદક / મેન્યુફેક્ચરર'
+  },
+  'Research institutions': {
+    en: 'Research & Science Institution',
+    hi: 'अनुसंधान एवं विज्ञान संस्थान',
+    gu: 'સંશોધન અને વિજ્ઞાન સંસ્થા'
   }
 };

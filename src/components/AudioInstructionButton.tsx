@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, RotateCcw, Gauge } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Volume2, VolumeX, RotateCcw, Pause, Play } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Language } from '@/types/innovategram';
 
@@ -23,11 +23,11 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
   const { language } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
   const [rate, setRate] = useState<number>(1.0); // 0.8, 1.0, 1.2
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const getTextToSpeak = (): string => {
     if (typeof text === 'string') return text;
-    return text[language] || text.gu || text.hi || text.en || '';
+    return text[language] || text.en || text.hi || text.gu || '';
   };
 
   const stopSpeaking = () => {
@@ -35,11 +35,12 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
       window.speechSynthesis.cancel();
     }
     setIsPlaying(false);
+    currentUtteranceRef.current = null;
   };
 
   const startSpeaking = () => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert('Text-to-speech is not supported on this browser.');
+      alert('Speech synthesis is not supported on this browser.');
       return;
     }
 
@@ -61,10 +62,29 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
       utterance.lang = 'en-IN';
     }
 
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
+    // Attempt to pick a matching system voice if available
+    const voices = window.speechSynthesis.getVoices();
+    if (voices && voices.length > 0) {
+      const targetLangPrefix = language === 'gu' ? 'gu' : language === 'hi' ? 'hi' : 'en';
+      const matchedVoice = voices.find(
+        v => v.lang.toLowerCase().startsWith(targetLangPrefix) || v.lang.toLowerCase().includes(targetLangPrefix)
+      );
+      if (matchedVoice) {
+        utterance.voice = matchedVoice;
+      }
+    }
 
+    utterance.onstart = () => setIsPlaying(true);
+    utterance.onend = () => {
+      setIsPlaying(false);
+      currentUtteranceRef.current = null;
+    };
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      currentUtteranceRef.current = null;
+    };
+
+    currentUtteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   };
 
@@ -80,14 +100,19 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
   const handleReplay = (e: React.MouseEvent) => {
     e.stopPropagation();
     stopSpeaking();
-    setTimeout(() => startSpeaking(), 100);
+    setTimeout(() => startSpeaking(), 120);
   };
 
   const cycleSpeed = (e: React.MouseEvent) => {
     e.stopPropagation();
     const speeds = [1.0, 1.2, 0.8];
     const nextIdx = (speeds.indexOf(rate) + 1) % speeds.length;
-    setRate(speeds[nextIdx]);
+    const newRate = speeds[nextIdx];
+    setRate(newRate);
+    if (isPlaying) {
+      stopSpeaking();
+      setTimeout(() => startSpeaking(), 100);
+    }
   };
 
   useEffect(() => {
@@ -96,14 +121,14 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
   }, [language]);
 
   return (
-    <span className={`inline-flex items-center gap-1.5 align-middle ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 align-middle select-none ${className}`}>
       <button
         type="button"
         onClick={togglePlay}
-        className={`inline-flex items-center gap-1 rounded-full font-bold transition-all shadow-xs cursor-pointer ${
+        className={`inline-flex items-center gap-1.5 rounded-full font-bold transition-all shadow-xs cursor-pointer ${
           isPlaying
-            ? 'bg-amber-500 text-white animate-pulse ring-2 ring-amber-300'
-            : 'bg-[#EAF5ED] text-[#176B45] hover:bg-emerald-200/80 hover:text-[#104C35] border border-emerald-300/60'
+            ? 'bg-amber-600 text-white animate-pulse ring-2 ring-amber-300'
+            : 'bg-[#EAF5ED] text-[#176B45] hover:bg-emerald-200/80 hover:text-[#104C35] border border-emerald-300/70'
         } ${
           size === 'xs'
             ? 'px-2 py-0.5 text-[10px]'
@@ -113,18 +138,26 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
             ? 'px-4 py-2 text-sm'
             : 'px-3 py-1.5 text-xs'
         }`}
-        title={isPlaying ? 'Pause audio instruction' : 'Listen to audio instruction'}
-        aria-label="Audio instruction"
+        title={isPlaying ? 'Pause voice guidance' : 'Listen in your language'}
+        aria-label="Voice instruction"
       >
         {isPlaying ? (
           <>
             <VolumeX className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-[10px] font-mono">Playing</span>
+            <span className="text-[10px] font-mono">
+              {language === 'gu' ? 'સાંભળી રહ્યા છો' : language === 'hi' ? 'चल रहा है...' : 'Playing...'}
+            </span>
           </>
         ) : (
           <>
-            <Volume2 className="w-3.5 h-3.5 shrink-0" />
-            {label && <span className="font-semibold">{label}</span>}
+            <Volume2 className="w-3.5 h-3.5 shrink-0 text-[#176B45]" />
+            {label ? (
+              <span className="font-semibold">{label}</span>
+            ) : (
+              <span className="font-semibold text-[11px]">
+                {language === 'gu' ? 'ઓડિયો' : language === 'hi' ? 'ऑडियो' : 'Audio'}
+              </span>
+            )}
           </>
         )}
       </button>
@@ -134,10 +167,10 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
         <button
           type="button"
           onClick={handleReplay}
-          className="p-1 rounded-full text-[#6B756E] hover:text-[#104C35] hover:bg-emerald-50 transition-colors"
+          className="p-1 rounded-full text-[#6B756E] hover:text-[#104C35] hover:bg-emerald-50 transition-colors cursor-pointer"
           title="Replay from start"
         >
-          <RotateCcw className="w-3 h-3" />
+          <RotateCcw className="w-3.5 h-3.5" />
         </button>
       )}
 
@@ -146,7 +179,7 @@ export const AudioInstructionButton: React.FC<AudioInstructionButtonProps> = ({
         <button
           type="button"
           onClick={cycleSpeed}
-          className="text-[10px] font-mono font-bold text-[#6B756E] hover:text-[#104C35] bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200"
+          className="text-[10px] font-mono font-bold text-[#6B756E] hover:text-[#104C35] bg-gray-100 hover:bg-gray-200 px-1.5 py-0.5 rounded border border-gray-200 cursor-pointer"
           title="Toggle speech speed (0.8x, 1x, 1.2x)"
         >
           {rate}x

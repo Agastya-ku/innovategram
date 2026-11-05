@@ -163,7 +163,33 @@ export const Header: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-3 border-t border-emerald-900/10 space-y-2">
+          <div className="lg:hidden py-3 border-t border-emerald-900/10 space-y-3">
+            {/* Mobile Language Switcher */}
+            <div className="flex items-center justify-between p-2 bg-emerald-50/70 rounded-xl border border-emerald-200">
+              <span className="text-xs font-bold text-[#104C35] flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-emerald-700" />
+                <span>ભાષા પસંદ કરો:</span>
+              </span>
+              <div className="flex items-center gap-1">
+                {languages.map(lang => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`px-2 py-1 text-xs font-bold rounded-lg transition-all ${
+                      language === lang.code
+                        ? 'bg-[#176B45] text-white shadow-xs'
+                        : 'bg-white text-[#18251E] border border-gray-200'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Link
               href="/innovator"
               onClick={() => setMobileMenuOpen(false)}

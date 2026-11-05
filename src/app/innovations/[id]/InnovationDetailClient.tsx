@@ -39,6 +39,11 @@ export default function InnovationDetailPage() {
   // Active language view tab for this innovation profile
   const [viewLang, setViewLang] = useState<Language>(language);
 
+  // Sync with global language changes
+  React.useEffect(() => {
+    setViewLang(language);
+  }, [language]);
+
   // Contact Request Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [requesterName, setRequesterName] = useState('Dr. Anand Verma');
@@ -194,31 +199,31 @@ export default function InnovationDetailPage() {
         {/* Language Tabs for Content Viewing */}
         <div className="flex items-center gap-2 border-b border-emerald-900/10 pb-2">
           <span className="text-[11px] font-bold text-[#6B756E] uppercase tracking-wider mr-1">
-            Read In:
+            વાંચો (Read In):
           </span>
           <button
-            onClick={() => setViewLang('en')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
-              viewLang === 'en' ? 'bg-[#176B45] text-white' : 'bg-gray-100 text-gray-700'
+            onClick={() => setViewLang('gu')}
+            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+              viewLang === 'gu' ? 'bg-[#176B45] text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            English
+            ગુજરાતી (Gujarati)
           </button>
           <button
             onClick={() => setViewLang('hi')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
+            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
               viewLang === 'hi' ? 'bg-[#176B45] text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
             हिन्दी (Hindi)
           </button>
           <button
-            onClick={() => setViewLang('gu')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
-              viewLang === 'gu' ? 'bg-[#176B45] text-white' : 'bg-gray-100 text-gray-700'
+            onClick={() => setViewLang('en')}
+            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+              viewLang === 'en' ? 'bg-[#176B45] text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            ગુજરાતી (Gujarati)
+            English
           </button>
         </div>
 

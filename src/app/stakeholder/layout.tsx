@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import { useInnovations } from '@/context/InnovationsContext';
+import { StakeholderRole, stakeholderRoleTranslations } from '@/lib/translations';
 import {
   LayoutDashboard,
   Compass,
@@ -14,7 +15,6 @@ import {
   Send,
   BarChart3,
   Settings,
-  Bell,
   Building,
   ShieldCheck,
   ChevronDown
@@ -22,12 +22,22 @@ import {
 
 export default function StakeholderLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { savedIds, connectionRequests } = useInnovations();
 
-  // Active simulated stakeholder organization
+  // Active simulated stakeholder organization & role
   const [orgName, setOrgName] = useState('National Innovation Foundation (NIF)');
-  const [role, setRole] = useState('Incubation Evaluator');
+  const [role, setRole] = useState<StakeholderRole>('Incubators');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedRole = localStorage.getItem('innovategram_stakeholder_role') as StakeholderRole;
+      if (storedRole) setRole(storedRole);
+
+      const storedOrg = localStorage.getItem('innovategram_stakeholder_org');
+      if (storedOrg) setOrgName(storedOrg);
+    }
+  }, []);
 
   const navItems = [
     { href: '/stakeholder', label: t('navOverview'), icon: LayoutDashboard },
@@ -45,15 +55,17 @@ export default function StakeholderLayout({ children }: { children: React.ReactN
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-white border-r border-emerald-900/10 flex flex-col justify-between hidden md:flex shrink-0">
         <div className="p-4 space-y-6">
-          {/* Organization Badge */}
-          <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/60">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#104C35] mb-0.5">
-              <Building className="w-3.5 h-3.5 text-[#176B45]" />
+          {/* Organization & Role Badge (RBAC) */}
+          <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200/70 space-y-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#104C35]">
+              <Building className="w-3.5 h-3.5 text-[#176B45] shrink-0" />
               <span className="truncate">{orgName}</span>
             </div>
             <div className="text-[11px] text-[#6B756E] flex items-center justify-between">
-              <span>{role}</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-600" />
+              <span className="font-semibold text-emerald-900">
+                {stakeholderRoleTranslations[role]?.[language] || role}
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
             </div>
           </div>
 
@@ -84,9 +96,9 @@ export default function StakeholderLayout({ children }: { children: React.ReactN
         <div className="p-4 border-t border-emerald-900/10 text-[11px] text-[#6B756E] space-y-1">
           <div className="flex items-center gap-1.5 font-bold text-[#104C35]">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>GovTech Protected</span>
+            <span>GovTech Protected RBAC</span>
           </div>
-          <p>Innovator privacy laws apply to all exported records.</p>
+          <p>Innovator contact privacy laws strictly enforced.</p>
         </div>
       </aside>
 
@@ -94,15 +106,15 @@ export default function StakeholderLayout({ children }: { children: React.ReactN
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Sub-Nav Bar */}
         <div className="md:hidden bg-white border-b border-emerald-900/10 p-2 overflow-x-auto flex gap-1.5">
-          {navItems.slice(0, 5).map(item => {
+          {navItems.slice(0, 6).map(item => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${
-                  isActive ? 'bg-[#176B45] text-white' : 'bg-gray-100 text-[#18251E]'
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${
+                  isActive ? 'bg-[#176B45] text-white' : 'text-[#6B756E] hover:bg-emerald-50'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -117,4 +129,3 @@ export default function StakeholderLayout({ children }: { children: React.ReactN
     </div>
   );
 }
-

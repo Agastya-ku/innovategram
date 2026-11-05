@@ -8,10 +8,9 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useInnovations } from '@/context/InnovationsContext';
 import { Sector, Stage, Innovation, MediaItem } from '@/types/innovategram';
 import { AudioInstructionButton } from '@/components/AudioInstructionButton';
-import { ConversationalVoiceForm } from '@/components/ConversationalVoiceForm';
+import { ConversationalVoiceForm, ConversationalFormData } from '@/components/ConversationalVoiceForm';
 import {
   Mic,
-  MicOff,
   Square,
   Play,
   RotateCcw,
@@ -25,7 +24,7 @@ import {
   Edit3,
   Check,
   ArrowRight,
-  ShieldAlert,
+  ShieldCheck,
   Sparkles,
   Phone,
   FileText,
@@ -34,18 +33,19 @@ import {
   HelpCircle,
   UserCheck,
   HeartHandshake,
-  MessageSquare
+  MessageSquare,
+  Printer
 } from 'lucide-react';
 
 const INDIAN_STATES_DISTRICTS: Record<string, string[]> = {
-  Gujarat: ['Banaskantha', 'Patan', 'Dahod', 'Vadodara', 'Sabarkantha', 'Rajkot', 'Kutch', 'Surat', 'Mehsana', 'Ahmedabad'],
-  Rajasthan: ['Nagaur', 'Jaisalmer', 'Sikar', 'Jodhpur', 'Jaipur', 'Udaipur', 'Barmer', 'Bikaner'],
-  Maharashtra: ['Gadchiroli', 'Kolhapur', 'Pune', 'Nashik', 'Aurangabad', 'Nagpur', 'Solapur', 'Satara'],
-  Punjab: ['Sangrur', 'Ludhiana', 'Amritsar', 'Patiala', 'Bathinda', 'Jalandhar', 'Hoshiarpur'],
-  'Madhya Pradesh': ['Mandsaur', 'Neemuch', 'Indore', 'Ujjain', 'Bhopal', 'Jabalpur', 'Khargone'],
-  Haryana: ['Hisar', 'Karnal', 'Rohtak', 'Sirsa', 'Kurukshetra', 'Sonipat'],
-  'Uttar Pradesh': ['Varanasi', 'Gorakhpur', 'Meerut', 'Lucknow', 'Jhansi', 'Aligarh'],
-  Karnataka: ['Dharwad', 'Belagavi', 'Mysuru', 'Ballari', 'Shivamogga', 'Tumakuru']
+  Gujarat: ['Banaskantha', 'Patan', 'Dahod', 'Vadodara', 'Sabarkantha', 'Rajkot', 'Kutch', 'Surat', 'Mehsana', 'Ahmedabad', 'Bhavnagar', 'Junagadh', 'Gandhinagar', 'Jamnagar', 'Amreli', 'Anand', 'Bharuch', 'Surendranagar', 'Navsari', 'Valsad'],
+  Rajasthan: ['Nagaur', 'Jaisalmer', 'Sikar', 'Jodhpur', 'Jaipur', 'Udaipur', 'Barmer', 'Bikaner', 'Ajmer', 'Alwar', 'Bhilwara', 'Kota'],
+  Maharashtra: ['Gadchiroli', 'Kolhapur', 'Pune', 'Nashik', 'Aurangabad', 'Nagpur', 'Solapur', 'Satara', 'Ahmednagar', 'Jalgaon'],
+  Punjab: ['Sangrur', 'Ludhiana', 'Amritsar', 'Patiala', 'Bathinda', 'Jalandhar', 'Hoshiarpur', 'Firozpur'],
+  'Madhya Pradesh': ['Mandsaur', 'Neemuch', 'Indore', 'Ujjain', 'Bhopal', 'Jabalpur', 'Khargone', 'Dewas'],
+  Haryana: ['Hisar', 'Karnal', 'Rohtak', 'Sirsa', 'Kurukshetra', 'Sonipat', 'Bhiwani', 'Fatehabad'],
+  'Uttar Pradesh': ['Varanasi', 'Gorakhpur', 'Meerut', 'Lucknow', 'Jhansi', 'Aligarh', 'Agra', 'Bareilly'],
+  Karnataka: ['Dharwad', 'Belagavi', 'Mysuru', 'Ballari', 'Shivamogga', 'Tumakuru', 'Mandya', 'Bagalkot']
 };
 
 function InnovatorPortalContent() {
@@ -59,7 +59,7 @@ function InnovatorPortalContent() {
 
   // Submitter / Helper fields for Option B (Assisted)
   const [submitterName, setSubmitterName] = useState<string>('');
-  const [submitterRelationship, setSubmitterRelationship] = useState<string>('Village Volunteer / મિત્ર');
+  const [submitterRelationship, setSubmitterRelationship] = useState<string>('Friend/Neighbor');
   const [submitterPhone, setSubmitterPhone] = useState<string>('');
   const [innovatorConsentGiven, setInnovatorConsentGiven] = useState<boolean>(true);
 
@@ -100,7 +100,7 @@ function InnovatorPortalContent() {
   const [aiSolution, setAiSolution] = useState<Record<string, string>>({ en: '', hi: '', gu: '' });
   const [aiSector, setAiSector] = useState<Sector>('Agriculture');
   const [aiStage, setAiStage] = useState<Stage>('Prototype');
-  const [aiConfidence, setAiConfidence] = useState<number>(94);
+  const [aiConfidence, setAiConfidence] = useState<number>(95);
   const [isEditingAi, setIsEditingAi] = useState(false);
 
   // Final submission state
@@ -133,9 +133,9 @@ function InnovatorPortalContent() {
           setAudioBlobUrl(url);
           if (!audioTranscript) {
             if (language === 'gu') {
-              setAudioTranscript('મેં ખેતરમાં ઓછા ખર્ચે નિંદામણ દૂર કરવા માટે દેશી સાઇકલના પુર્જામાંથી મશીન બનાવ્યું છે જે બહુ સરળતાથી ચાલે છે.');
+              setAudioTranscript('મેં ખેતરમાં ઓછા ખર્ચે નિંદામણ દૂર કરવા માટે દેશી સાઇકલના પુર્જામાંથી હાથથી ચાલતું મશીન બનાવ્યું છે જે બહુ સરળતાથી ચાલે છે અને મજૂરી ખર્ચ ઘટાડે છે.');
             } else if (language === 'hi') {
-              setAudioTranscript('मैंने खेतों के लिए एक कम लागत वाला यंत्र बनाया है जो बिना बिजली के फसलों से खरपतवार साफ करता है।');
+              setAudioTranscript('मैंने खेतों के लिए एक कम लागत वाला यंत्र बनाया है जो बिना बिजली के फसलों से खरपतवार साफ करता है और शारीरिक श्रम बचाता है।');
             } else {
               setAudioTranscript('I built a low-cost manually propelled farm tool made from recycled bicycle parts to remove weeds without petrol or electricity.');
             }
@@ -148,7 +148,7 @@ function InnovatorPortalContent() {
       console.warn('Microphone permission not granted or simulated', err);
       setAudioBlobUrl('https://actions.google.com/sounds/v1/ambiences/outdoor_ambience.ogg');
       if (language === 'gu') {
-        setAudioTranscript('મેં ખેતરમાં નિંદામણ દૂર કરવા માટે દેશી જુગાડથી મશીન બનાવ્યું છે.');
+        setAudioTranscript('મેં ખેતરમાં નિંદામણ દૂર કરવા માટે દેશી જુગાડથી મશીન બનાવ્યું છે જે શારીરિક મહેનત બચાવે છે.');
       } else if (language === 'hi') {
         setAudioTranscript('मैंने खेतों के लिए एक कम लागत वाला यंत्र बनाया है जो फसलों से खरपतवार साफ करता है।');
       } else {
@@ -202,7 +202,7 @@ function InnovatorPortalContent() {
     setGpsLoading(true);
     setGpsError(null);
     if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your browser.');
+      setGpsError('Geolocation is not supported by your browser. Please select state and district manually below.');
       setGpsLoading(false);
       return;
     }
@@ -211,13 +211,13 @@ function InnovatorPortalContent() {
         setGpsLoading(false);
         setState('Gujarat');
         setDistrict('Patan');
-        setVillage('Radhanpur Rural');
+        setVillage(language === 'gu' ? 'રાધનપુર ગ્રામીણ' : language === 'hi' ? 'राधनपुर ग्रामीण' : 'Radhanpur Rural');
       },
       err => {
         setGpsLoading(false);
-        setGpsError('Could not obtain GPS. Please select your State and District manually below.');
+        setGpsError('Could not obtain GPS coordinates. Please select your State and District manually below.');
       },
-      { timeout: 7000 }
+      { timeout: 6000 }
     );
   };
 
@@ -226,25 +226,58 @@ function InnovatorPortalContent() {
     setAiProcessing(true);
     setStep('ai-review');
 
+    try {
+      const fallbackTranscript =
+        language === 'gu'
+          ? 'મેં ખેતી માટે નીંદણ કાઢવાનું દેશી સાઇકલ આધારિત મશીન બનાવ્યું છે.'
+          : language === 'hi'
+          ? 'मैंने खेतों के लिए खरपतवार हटाने वाली मशीन बनाई है।'
+          : 'I have created a bicycle-based weeding machine for farming.';
+      const res = await fetch('/api/ai-classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: audioTranscript || fallbackTranscript,
+          language,
+          village
+        })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setAiTitle(json.data.extractedTitle);
+        setAiProblem(json.data.extractedProblem);
+        setAiSolution(json.data.extractedSolution);
+        setAiSector(json.data.sector);
+        setAiStage(json.data.stage);
+        setAiConfidence(json.data.confidenceScore || 95);
+        setAiProcessing(false);
+        return;
+      }
+    } catch (e) {
+      console.warn('API classify fallback', e);
+    }
+
+    // High quality client fallback
     setTimeout(() => {
       let titleGu = 'ઓછા ખર્ચે હાથથી ચાલતું ખેતી સાધન';
       let titleHi = 'कम लागत वाला हस्तचालित कृषि उपकरण';
-      let titleEn = 'Low-Cost Manual Agro Implement';
+      let titleEn = 'Low-Cost Manual Agro Weeder Machine';
 
       let probGu = 'ચોમાસામાં ખેતરમાં નીંદણ કાઢવામાં બહુ મહેનત પડે છે અને મોંઘા મજૂરો મળતા નથી.';
       let probHi = 'वर्षा ऋतु में खेतों से खरपतवार निकालना बहुत थकाऊ होता है और महंगे मजदूरों की भारी कमी रहती है।';
-      let probEn = 'Manual weeding in rural farmland is backbreaking and requires unaffordable hired labor during the monsoon.';
+      let probEn = 'Manual weeding in rural farmland is backbreaking and requires unaffordable hired labor during monsoon.';
 
       let solGu = 'સાઇકલના જૂના પાર્ટ્સમાંથી બનેલું પૈડાંવાળું સાધન, જેમાં સરળતાથી બદલી શકાય તેવા બ્લેડ છે.';
       let solHi = 'साइकिल के पुराने कलपुर्जों से बना पहिएदार हल्का यंत्र, जिसमें आसानी से बदले जा सकने वाले ब्लेड लगे हैं।';
       let solEn = 'A lightweight wheel-assisted device fabricated from recycled cycle parts with interchangeable scraping blades.';
 
-      if (audioTranscript.toLowerCase().includes('પાણી') || audioTranscript.toLowerCase().includes('water') || audioTranscript.includes('સિંચાઈ')) {
-        titleGu = 'સ્માર્ટ પાણી બચાવ પ્રણાલી';
-        titleHi = 'स्मार्ट जल संरक्षण एवं बचत प्रणाली';
-        titleEn = 'Smart Water Conservation Module';
+      const tLow = (audioTranscript || '').toLowerCase();
+      if (tLow.includes('પાણી') || tLow.includes('water') || tLow.includes('સિંચાઈ') || tLow.includes('सिंचाई')) {
+        titleGu = 'સ્માર્ટ પાણી બચાવ અને ડ્રિપ પ્રણાલી';
+        titleHi = 'स्मार्ट जल संरक्षण एवं ड्रिप प्रणाली';
+        titleEn = 'Smart Water Conservation & Drip Module';
         setAiSector('Water and Sanitation');
-      } else if (audioTranscript.toLowerCase().includes('સોલાર') || audioTranscript.toLowerCase().includes('solar') || audioTranscript.includes('ઊર્જા')) {
+      } else if (tLow.includes('સોલાર') || tLow.includes('solar') || tLow.includes('ઊર્જા') || tLow.includes('सौर')) {
         titleGu = 'ઑફ-ગ્રીડ સોલાર પાવર યુનિટ';
         titleHi = 'ऑफ-ग्रिड सौर ऊर्जा इकाई';
         titleEn = 'Off-Grid Renewable Solar Unit';
@@ -259,11 +292,11 @@ function InnovatorPortalContent() {
       setAiStage('Prototype');
       setAiConfidence(95);
       setAiProcessing(false);
-    }, 1800);
+    }, 1200);
   };
 
   // Conversational Form completion bridge
-  const handleConversationalComplete = (cData: any) => {
+  const handleConversationalComplete = (cData: ConversationalFormData) => {
     setInnovatorName(cData.innovatorName);
     setAiTitle({
       gu: cData.title,
@@ -303,12 +336,12 @@ function InnovatorPortalContent() {
         id: 'p-def',
         type: 'photo',
         url: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80',
-        caption: 'Grassroots working prototype'
+        caption: 'Grassroots working prototype photograph'
       });
     }
 
     if (videoUrl) {
-      mediaItems.push({ id: 'v-1', type: 'video', url: videoUrl, caption: 'Working demonstration video' });
+      mediaItems.push({ id: 'v-1', type: 'video', url: videoUrl, caption: 'Working demonstration video clip' });
     }
 
     const newInnovation = await addInnovation({
@@ -323,19 +356,19 @@ function InnovatorPortalContent() {
       stage: aiStage,
       status: 'Pending Review',
       registrationType: pathway,
-      submitterName: pathway === 'assisted' ? (submitterName || 'સહાયક સ્વયંસેવક') : undefined,
+      submitterName: pathway === 'assisted' ? (submitterName || (language === 'gu' ? 'સહાયક સ્વયંસેવક' : language === 'hi' ? 'सहायक स्वयंसेवक' : 'Community Volunteer')) : undefined,
       submitterRelationship: pathway === 'assisted' ? submitterRelationship : undefined,
       submitterPhoneMasked: pathway === 'assisted' && submitterPhone ? `${submitterPhone.slice(0, 5)} •••••` : undefined,
       innovatorConsentGiven: pathway === 'assisted' ? innovatorConsentGiven : true,
       location: {
         state,
         district,
-        villageOrTown: village || 'ગામ પંચાયત વિસ્તાર',
+        villageOrTown: village || (language === 'gu' ? 'ગામ પંચાયત વિસ્તાર' : language === 'hi' ? 'ग्राम पंचायत क्षेत्र' : 'Village/Panchayat Area'),
         lat: state === 'Gujarat' ? 23.8343 : 26.9124,
         lng: state === 'Gujarat' ? 71.6033 : 75.7873,
         isApproximate: true
       },
-      innovatorName: innovatorName || (pathway === 'assisted' ? 'ગ્રામીણ શોધક' : 'પાયાના આવિષ્કારક'),
+      innovatorName: innovatorName || (pathway === 'assisted' ? (language === 'gu' ? 'ગ્રામીણ શોધક' : language === 'hi' ? 'ग्रामीण खोजकर्ता' : 'Rural Innovator') : (language === 'gu' ? 'પાયાના આવિષ્કારક' : language === 'hi' ? 'जमीनी आविष्कारक' : 'Grassroots Innovator')),
       innovatorContactProtected: true,
       innovatorPhoneMasked: innovatorPhone ? `${innovatorPhone.slice(0, 5)} •••••` : '+91 94273 •••••',
       innovatorPhone: innovatorPhone || '+91 94273 12345',
@@ -375,7 +408,7 @@ function InnovatorPortalContent() {
                 size="xs"
               />
             </div>
-            <p className="text-xs text-[#6B756E]">સરળ, વોઇસ-આધારિત, 0% કાગળિયા</p>
+            <p className="text-xs text-[#6B756E]">{t('innovatorPortalTagline')}</p>
           </div>
         </div>
 
@@ -409,10 +442,10 @@ function InnovatorPortalContent() {
       {/* DIRECT SUBMISSION FLOW */}
       {submissionMode === 'direct' && (
         <>
-          {/* TWO PATHWAYS TOGGLE CARD (OPTION A vs OPTION B) */}
+          {/* TWO PATHWAYS TOGGLE CARD (REQUIREMENT 3: OPTION A vs OPTION B) */}
           {step === 'intro' && (
             <div className="bg-white rounded-3xl p-6 border border-emerald-900/10 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <span className="text-xs font-bold text-[#176B45] uppercase tracking-wider">
                     {t('pathwayTitle')}
@@ -433,32 +466,32 @@ function InnovatorPortalContent() {
                   <button
                     type="button"
                     onClick={() => setPathway('self')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       pathway === 'self'
                         ? 'bg-[#176B45] text-white shadow-xs'
                         : 'text-[#6B756E] hover:text-[#18251E]'
                     }`}
                   >
-                    ઓપ્શન A: પોતાના માટે
+                    {t('pathwayTabSelf')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setPathway('assisted')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       pathway === 'assisted'
                         ? 'bg-amber-600 text-white shadow-xs'
                         : 'text-[#6B756E] hover:text-[#18251E]'
                     }`}
                   >
-                    ઓપ્શન B: અન્ય વતી
+                    {t('pathwayTabAssisted')}
                   </button>
                 </div>
               </div>
 
               {/* Assisted Pathway (Option B) Submitter Fields */}
               {pathway === 'assisted' && (
-                <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-3 text-xs text-amber-950 animate-in fade-in">
-                  <div className="flex items-center gap-2 font-bold text-amber-900">
+                <div className="p-5 bg-amber-50/80 border border-amber-200 rounded-2xl space-y-4 text-xs text-amber-950 animate-in fade-in">
+                  <div className="flex items-center gap-2 font-bold text-amber-900 border-b border-amber-200/80 pb-2">
                     <HeartHandshake className="w-4 h-4 text-amber-700 shrink-0" />
                     <span>{t('helperNotice')}</span>
                     <AudioInstructionButton text={t('helperNotice')} size="xs" />
@@ -471,10 +504,10 @@ function InnovatorPortalContent() {
                       </label>
                       <input
                         type="text"
-                        placeholder="દા.ત. અજય વર્મા (સ્વયંસેવક)"
+                        placeholder={language === 'gu' ? 'દા.ત. અજય વર્મા (સ્વયંસેવક/શિક્ષક)' : language === 'hi' ? 'उदा. अजय वर्मा (स्वयंसेवक/शिक्षक)' : 'e.g. Ajay Verma (Volunteer/Teacher)'}
                         value={submitterName}
                         onChange={e => setSubmitterName(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs"
+                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
                     <div>
@@ -484,13 +517,13 @@ function InnovatorPortalContent() {
                       <select
                         value={submitterRelationship}
                         onChange={e => setSubmitterRelationship(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs"
+                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
                       >
-                        <option value="ગામના મિત્ર / પડોશી">ગામના મિત્ર / પડોશી (Friend/Neighbor)</option>
-                        <option value="પરિવારના સભ્ય">પરિવારના સભ્ય (Family Member)</option>
-                        <option value="NGO કાર્યકર્તા / સ્વયંસેવક">NGO કાર્યકર્તા / સ્વયંસેવક (Volunteer/NGO)</option>
-                        <option value="શિક્ષક / પ્રોફેસર">શિક્ષક / પ્રોફેસર (Teacher/Mentor)</option>
-                        <option value="ગામ પંચાયત પ્રતિનિધિ">ગામ પંચાયત પ્રતિનિધિ (Panchayat Representative)</option>
+                        <option value="Friend/Neighbor">{language === 'gu' ? 'ગામના મિત્ર / પડોશી' : language === 'hi' ? 'गांव के मित्र / पड़ोसी' : 'Friend / Neighbor'}</option>
+                        <option value="Family Member">{language === 'gu' ? 'પરિવારના સભ્ય' : language === 'hi' ? 'परिवार के सदस्य' : 'Family Member'}</option>
+                        <option value="Volunteer/NGO">{language === 'gu' ? 'NGO કાર્યકર્તા / સ્વયંસેવક' : language === 'hi' ? 'एनजीओ कार्यकर्ता / स्वयंसेवक' : 'Volunteer / NGO Worker'}</option>
+                        <option value="Teacher/Mentor">{language === 'gu' ? 'શિક્ષક / પ્રોફેસર' : language === 'hi' ? 'शिक्षक / प्रोफेसर' : 'Teacher / Mentor'}</option>
+                        <option value="Panchayat Representative">{language === 'gu' ? 'ગામ પંચાયત પ્રતિનિધિ' : language === 'hi' ? 'ग्राम पंचायत प्रतिनिधि' : 'Panchayat Representative'}</option>
                       </select>
                     </div>
                   </div>
@@ -502,28 +535,28 @@ function InnovatorPortalContent() {
                       </label>
                       <input
                         type="text"
-                        placeholder="મૂળ શોધકનું પૂરું નામ"
+                        placeholder={language === 'gu' ? 'મૂળ શોધકનું પૂરું નામ' : language === 'hi' ? 'मूल आविष्कारक का पूरा नाम' : "Actual Inventor's Full Name"}
                         value={innovatorName}
                         onChange={e => setInnovatorName(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs"
+                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
                     <div>
                       <label className="block font-bold text-[#18251E] mb-1">
-                        તમારો ફોન નંબર (સહાયક માટે SMS)
+                        {t('fieldOptionalContact')}
                       </label>
                       <input
                         type="tel"
                         placeholder="+91 98765 •••••"
                         value={submitterPhone}
                         onChange={e => setSubmitterPhone(e.target.value)}
-                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs"
+                        className="w-full bg-white border border-amber-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
                   </div>
 
                   {/* Explicit Inventor Consent Checkbox */}
-                  <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                  <label className="flex items-start gap-2.5 pt-1 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={innovatorConsentGiven}
@@ -534,6 +567,10 @@ function InnovatorPortalContent() {
                       {t('fieldConsentCheckbox')}
                     </span>
                   </label>
+
+                  <div className="text-[11px] text-[#6B756E] pt-1">
+                    {t('noDocumentsRequiredNote')}
+                  </div>
                 </div>
               )}
             </div>
@@ -544,19 +581,19 @@ function InnovatorPortalContent() {
             <div className="bg-white rounded-3xl p-6 sm:p-10 border border-emerald-900/10 shadow-sm text-center space-y-8">
               <div className="space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#176B45] bg-emerald-100/70 px-3 py-1 rounded-full">
-                  વોઇસ-ફર્સ્ટ ગ્રામીણ મંચ
+                  {t('innovatorPortalBadge')}
                 </span>
                 <div className="flex items-center justify-center gap-2">
                   <h1 className="text-2xl sm:text-4xl font-extrabold text-[#104C35] font-serif leading-tight">
                     {t('innovatorWelcomeTitle')}
                   </h1>
                   <AudioInstructionButton
-                    text={`${t('innovatorWelcomeTitle')}. ${t('innovatorWelcomeSubtitle')}`}
+                    text={t('voiceInstructionSubmission')}
                     size="sm"
                   />
                 </div>
-                <p className="text-sm sm:text-base text-[#18251E]/80 max-w-lg mx-auto leading-relaxed">
-                  {t('innovatorWelcomeSubtitle')}
+                <p className="text-sm sm:text-base text-[#18251E]/85 max-w-lg mx-auto leading-relaxed">
+                  {t('voiceInstructionSubmission')}
                 </p>
               </div>
 
@@ -574,12 +611,13 @@ function InnovatorPortalContent() {
                       {t('voiceRecordBtn')}
                     </span>
                   </button>
-                  <p className="text-xs text-[#6B756E] font-medium">
-                    એકસાથે સંપૂર્ણ વાત બોલો
-                  </p>
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B756E]">
+                    <AudioInstructionButton text={t('voiceInstructionSubmission')} size="xs" />
+                    <span>{t('speakAllInOne')}</span>
+                  </div>
                 </div>
 
-                <div className="text-xs font-bold text-gray-400 uppercase">અથવા</div>
+                <div className="text-xs font-bold text-gray-400 uppercase">{t('orText')}</div>
 
                 {/* Method 2: Conversational Voice Q&A Assistant */}
                 <div className="space-y-3">
@@ -589,31 +627,34 @@ function InnovatorPortalContent() {
                   >
                     <MessageSquare className="w-12 h-12 mb-1" />
                     <span className="text-xs sm:text-sm font-bold leading-tight">
-                      સવાલ-જવાબ સહાયક (Q&A)
+                      {t('conversationalOptionTitle')}
                     </span>
                   </button>
                   <p className="text-xs text-[#6B756E] font-medium">
-                    એક પછી એક સવાલનો જવાબ આપો
+                    {t('conversationalOptionDesc')}
                   </p>
                 </div>
               </div>
 
               {/* Alternate Media Upload Options */}
               <div className="border-t border-emerald-900/10 pt-6">
-                <p className="text-xs font-semibold text-[#6B756E] uppercase tracking-wider mb-4">
-                  અથવા ફોટો અને વીડિયો દ્વારા શરૂ કરો
-                </p>
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <p className="text-xs font-semibold text-[#6B756E] uppercase tracking-wider">
+                    {t('orStartMedia')}
+                  </p>
+                  <AudioInstructionButton text={t('voiceInstructionPhoto')} size="xs" />
+                </div>
                 <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
                   <button
                     onClick={() => setStep('media')}
-                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-emerald-900/20 bg-emerald-50/50 hover:bg-emerald-100/60 text-[#104C35] font-semibold text-xs sm:text-sm transition-colors"
+                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-emerald-900/20 bg-emerald-50/50 hover:bg-emerald-100/60 text-[#104C35] font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
                   >
                     <Camera className="w-4 h-4 text-[#176B45]" />
                     <span>{t('photoUploadBtn')}</span>
                   </button>
                   <button
                     onClick={() => setStep('media')}
-                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-emerald-900/20 bg-emerald-50/50 hover:bg-emerald-100/60 text-[#104C35] font-semibold text-xs sm:text-sm transition-colors"
+                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-emerald-900/20 bg-emerald-50/50 hover:bg-emerald-100/60 text-[#104C35] font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
                   >
                     <Video className="w-4 h-4 text-[#176B45]" />
                     <span>{t('videoUploadBtn')}</span>
@@ -632,12 +673,12 @@ function InnovatorPortalContent() {
                     {isRecording ? t('recordingActive') : t('voiceInstructions')}
                   </h3>
                   <AudioInstructionButton
-                    text={isRecording ? t('recordingActive') : t('voiceInstructions')}
+                    text={isRecording ? t('recordingActive') : t('voiceInstructionSubmission')}
                     size="sm"
                   />
                 </div>
                 <p className="text-xs text-[#6B756E]">
-                  તમે શું બનાવ્યું છે, કઈ રીતે કામ કરે છે અને કઈ સમસ્યા દૂર કરે છે તે તમારી બોલીમાં જણાવો.
+                  {t('voiceInstructionSubmission')}
                 </p>
               </div>
 
@@ -657,7 +698,11 @@ function InnovatorPortalContent() {
                     </>
                   ) : (
                     <div className="text-xs text-emerald-800 font-medium">
-                      Audio ready: {recordingSeconds} seconds recorded
+                      {language === 'gu'
+                        ? `ઓડિયો રેકોર્ડ પૂર્ણ: ${recordingSeconds} સેકન્ડ`
+                        : language === 'hi'
+                        ? `ऑडियो रिकॉर्ड पूरा: ${recordingSeconds} सेकंड`
+                        : `Audio recording complete: ${recordingSeconds}s`}
                     </div>
                   )}
                 </div>
@@ -672,7 +717,7 @@ function InnovatorPortalContent() {
                 {isRecording ? (
                   <button
                     onClick={stopRecording}
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-colors"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-colors cursor-pointer"
                   >
                     <Square className="w-4 h-4 fill-white" />
                     <span>{t('stopRecording')}</span>
@@ -684,17 +729,16 @@ function InnovatorPortalContent() {
                     )}
                     <button
                       onClick={resetRecording}
-                      className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#18251E] font-semibold px-4 py-2.5 rounded-xl text-xs transition-colors"
+                      className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#18251E] font-semibold px-4 py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>{t('retryRecording')}</span>
                     </button>
                     <button
                       onClick={() => setStep('media')}
-                      className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm"
+                      className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm cursor-pointer"
                     >
-                      <span>Continue to Photos / Media</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span>{t('nextPhotoVideo')}</span>
                     </button>
                   </>
                 )}
@@ -710,11 +754,11 @@ function InnovatorPortalContent() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-bold text-[#104C35]">{t('mediaTitle')}</h3>
                     <AudioInstructionButton
-                      text={`${t('mediaTitle')}. ${t('mediaSubtitle')}`}
+                      text={t('voiceInstructionPhoto')}
                       size="sm"
                     />
                   </div>
-                  <p className="text-xs text-[#6B756E] mt-1">{t('mediaSubtitle')}</p>
+                  <p className="text-xs text-[#6B756E] mt-1">{t('voiceInstructionPhoto')}</p>
                 </div>
               </div>
 
@@ -736,9 +780,11 @@ function InnovatorPortalContent() {
                     <Camera className="w-6 h-6" />
                   </div>
                   <span className="text-sm font-bold text-[#104C35]">
-                    {t('takePhoto')} or Choose Pictures
+                    {t('takePhoto')} {language === 'gu' ? 'અથવા ફોનમાંથી પસંદ કરો' : language === 'hi' ? 'या फोन से चुनें' : 'or choose from phone'}
                   </span>
-                  <span className="text-xs text-[#6B756E]">Supports JPG, PNG up to 10MB</span>
+                  <span className="text-xs text-[#6B756E]">
+                    {language === 'gu' ? 'JPG, PNG સપોર્ટેડ' : language === 'hi' ? 'JPG, PNG समर्थित' : 'JPG, PNG supported'}
+                  </span>
                 </label>
               </div>
 
@@ -776,32 +822,37 @@ function InnovatorPortalContent() {
                     <Video className="w-6 h-6" />
                   </div>
                   <span className="text-sm font-bold text-[#104C35]">
-                    {t('recordVideo')} or Choose Clip
+                    {t('recordVideo')} {language === 'gu' ? 'અથવા ક્લિપ પસંદ કરો' : language === 'hi' ? 'या वीडियो क्लिप चुनें' : 'or select a video clip'}
                   </span>
-                  <span className="text-xs text-[#6B756E]">Short 30-60 second clip of the machine working</span>
+                  <span className="text-xs text-[#6B756E]">
+                    {language === 'gu' ? 'મશીન કામ કરતું હોય તેવો ૩૦-૬૦ સેકન્ડનો વીડિયો' : language === 'hi' ? 'मशीन के संचालन का 30-60 सेकंड का वीडियो' : '30-60 second video demonstrating operation'}
+                  </span>
                 </label>
               </div>
 
               {videoUrl && (
                 <div className="p-3 bg-emerald-50 rounded-xl flex items-center justify-between text-xs text-[#104C35]">
-                  <span className="font-semibold">Video ready for upload</span>
-                  <button onClick={() => setVideoUrl(null)} className="text-red-600 font-bold">Remove</button>
+                  <span className="font-semibold">
+                    {language === 'gu' ? 'વીડિયો અપલોડ માટે તૈયાર છે' : language === 'hi' ? 'वीडियो अपलोड के लिए तैयार है' : 'Video ready for upload'}
+                  </span>
+                  <button onClick={() => setVideoUrl(null)} className="text-red-600 font-bold">
+                    {language === 'gu' ? 'દૂર કરો' : language === 'hi' ? 'हटाएं' : 'Remove'}
+                  </button>
                 </div>
               )}
 
               <div className="flex justify-between items-center pt-4 border-t border-emerald-900/10">
                 <button
                   onClick={() => setStep('recording')}
-                  className="text-xs font-semibold text-[#6B756E] hover:text-[#18251E]"
+                  className="text-xs font-semibold text-[#6B756E] hover:text-[#18251E] cursor-pointer"
                 >
-                  Back to Audio
+                  {t('backAudio')}
                 </button>
                 <button
                   onClick={() => setStep('location')}
-                  className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm"
+                  className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm cursor-pointer"
                 >
-                  <span>Continue to Location</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{t('nextLocation')}</span>
                 </button>
               </div>
             </div>
@@ -815,29 +866,43 @@ function InnovatorPortalContent() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-bold text-[#104C35]">{t('locationTitle')}</h3>
                     <AudioInstructionButton
-                      text={`${t('locationTitle')}. ${t('locationSubtitle')}`}
+                      text={t('voiceInstructionLocation')}
                       size="sm"
                     />
                   </div>
-                  <p className="text-xs text-[#6B756E] mt-1">{t('locationSubtitle')}</p>
+                  <p className="text-xs text-[#6B756E] mt-1">{t('voiceInstructionLocation')}</p>
                 </div>
               </div>
 
-              {/* GPS Quick Button */}
+              {/* GPS Quick Button (Optional, never forces GPS) */}
               <div className="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-[#176B45]" />
                   <div>
-                    <p className="text-xs font-bold text-[#104C35]">Automatic Location Detection</p>
-                    <p className="text-[11px] text-[#6B756E]">Detect State and District with device permission</p>
+                    <p className="text-xs font-bold text-[#104C35]">
+                      {language === 'gu'
+                        ? 'સ્વચાલિત સ્થાન શોધ (GPS - વૈકલ્પિક)'
+                        : language === 'hi'
+                        ? 'स्वचालित स्थान खोज (GPS - वैकल्पिक)'
+                        : 'Auto Location Detection (GPS - Optional)'}
+                    </p>
+                    <p className="text-[11px] text-[#6B756E]">
+                      {language === 'gu'
+                        ? 'પરવાનગી સાથે રાજ્ય અને જિલ્લો આપોઆપ સેટ કરો'
+                        : language === 'hi'
+                        ? 'अनुमति मिलने पर राज्य और जिला स्वतः सेट करें'
+                        : 'Set state and district automatically with permission'}
+                    </p>
                   </div>
                 </div>
                 <button
                   onClick={handleGetLocation}
                   disabled={gpsLoading}
-                  className="w-full sm:w-auto bg-white border border-emerald-900/20 text-[#176B45] font-bold text-xs px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-100/50"
+                  className="w-full sm:w-auto bg-white border border-emerald-900/20 text-[#176B45] font-bold text-xs px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-100/50 cursor-pointer"
                 >
-                  {gpsLoading ? 'Detecting...' : t('useGpsBtn')}
+                  {gpsLoading
+                    ? (language === 'gu' ? 'શોધી રહ્યા છીએ...' : language === 'hi' ? 'खोज रहे हैं...' : 'Detecting...')
+                    : t('useGpsBtn')}
                 </button>
               </div>
 
@@ -884,34 +949,60 @@ function InnovatorPortalContent() {
                 <label className="block text-xs font-bold text-[#18251E] mb-1.5">{t('enterVillage')}</label>
                 <input
                   type="text"
-                  placeholder="દા.ત. રાધનપુર અથવા પાટણ"
+                  placeholder={
+                    language === 'gu'
+                      ? 'દા.ત. રાધનપુર, પાટણ અથવા તમારા ગામનું નામ'
+                      : language === 'hi'
+                      ? 'उदा. राधनपुर, पाटन या अपने गांव का नाम'
+                      : 'e.g. Radhanpur, Patan or your village name'
+                  }
                   value={village}
                   onChange={e => setVillage(e.target.value)}
                   className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#176B45]"
                 />
               </div>
 
-              {/* Optional Contact Details if not in Option B */}
+              {/* Optional Contact Details if Option A (Self) */}
               {pathway === 'self' && (
                 <div className="border-t border-emerald-900/10 pt-4 space-y-4">
                   <div className="flex items-center gap-2 text-xs font-bold text-[#104C35]">
                     <Phone className="w-3.5 h-3.5 text-[#176B45]" />
-                    <span>આવિષ્કારકની વિગતો (વૈકલ્પિક - પ્રાઈવસી શીલ્ડ હેઠળ સુરક્ષિત)</span>
+                    <span>
+                      {language === 'gu'
+                        ? 'આવિષ્કારકની વિગતો (વૈકલ્પિક - પ્રાઈવસી શીલ્ડ હેઠળ સુરક્ષિત)'
+                        : language === 'hi'
+                        ? 'आविष्कारक का विवरण (वैकल्पिक - गोपनीयता सुरक्षित)'
+                        : "Innovator's Details (Optional - Privacy Protected)"}
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-[#6B756E] mb-1">તમારું પૂરું નામ</label>
+                      <label className="block text-xs font-medium text-[#6B756E] mb-1">
+                        {language === 'gu' ? 'તમારું પૂરું નામ' : language === 'hi' ? 'आपका पूरा नाम' : 'Your Full Name'}
+                      </label>
                       <input
                         type="text"
-                        placeholder="દા.ત. રમેશભાઈ પટેલ"
+                        placeholder={
+                          language === 'gu'
+                            ? 'દા.ત. રમેશભાઈ પટેલ'
+                            : language === 'hi'
+                            ? 'उदा. रमेश भाई पटेल'
+                            : 'e.g. Ramesh Patel'
+                        }
                         value={innovatorName}
                         onChange={e => setInnovatorName(e.target.value)}
                         className="w-full bg-[#F8FAF7] border border-emerald-900/20 rounded-xl p-2.5 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-[#6B756E] mb-1">મોબાઇલ નંબર (SMS અપડેટ્સ માટે)</label>
+                      <label className="block text-xs font-medium text-[#6B756E] mb-1">
+                        {language === 'gu'
+                          ? 'મોબાઇલ નંબર (SMS અપડેટ્સ માટે)'
+                          : language === 'hi'
+                          ? 'मोबाइल नंबर (SMS अपडेट के लिए)'
+                          : 'Mobile Number (For SMS updates)'}
+                      </label>
                       <input
                         type="tel"
                         placeholder="+91 98765 43210"
@@ -922,7 +1013,11 @@ function InnovatorPortalContent() {
                     </div>
                   </div>
                   <p className="text-[11px] text-[#6B756E]">
-                    અમે તમારો મોબાઇલ નંબર ક્યારેય સાર્વજનિક નથી કરતા. માત્ર ચકાસાયેલ સંસ્થાઓ પરવાનગી સાથે જ સંપર્ક કરી શકે છે.
+                    {language === 'gu'
+                      ? 'અમે તમારો મોબાઇલ નંબર ક્યારેય સાર્વજનિક નથી કરતા. માત્ર ચકાસાયેલ સંસ્થાઓ પરવાનગી સાથે જ સંપર્ક કરી શકે છે.'
+                      : language === 'hi'
+                      ? 'हम आपका मोबाइल नंबर कभी सार्वजनिक नहीं करते। केवल सत्यापित संस्थाएं ही अनुमति के साथ संपर्क कर सकती हैं।'
+                      : 'We never publicly display your phone number. Only verified organizations may contact you with your consent.'}
                   </p>
                 </div>
               )}
@@ -930,16 +1025,16 @@ function InnovatorPortalContent() {
               <div className="flex justify-between items-center pt-4 border-t border-emerald-900/10">
                 <button
                   onClick={() => setStep('media')}
-                  className="text-xs font-semibold text-[#6B756E] hover:text-[#18251E]"
+                  className="text-xs font-semibold text-[#6B756E] hover:text-[#18251E] cursor-pointer"
                 >
-                  Back to Media
+                  {t('backMedia')}
                 </button>
                 <button
                   onClick={processSubmissionWithAI}
-                  className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm"
+                  className="flex items-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-emerald-300" />
-                  <span>{t('processVoiceWithAI')}</span>
+                  <span>{t('processVoiceWithAI')} →</span>
                 </button>
               </div>
             </div>
@@ -951,9 +1046,9 @@ function InnovatorPortalContent() {
               {aiProcessing ? (
                 <div className="py-16 text-center space-y-4">
                   <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <h3 className="text-lg font-bold text-[#104C35]">AI એન્જિન તમારા અવાજ અને વિગતોનું વિશ્લેષણ કરી રહ્યું છે...</h3>
+                  <h3 className="text-lg font-bold text-[#104C35]">{t('aiAnalyzing')}</h3>
                   <p className="text-xs text-[#6B756E] max-w-sm mx-auto">
-                    ઓડિયો ટ્રાન્સક્રિપ્શન, ભાષા ઓળખ, સમસ્યા અને ઉપાય તારવણી તથા ૩ ભાષાઓમાં રૂપાંતર.
+                    {t('aiAnalyzingDesc')}
                   </p>
                 </div>
               ) : (
@@ -962,12 +1057,12 @@ function InnovatorPortalContent() {
                     <div>
                       <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#176B45] bg-emerald-50 px-2.5 py-1 rounded-full mb-1">
                         <Sparkles className="w-3.5 h-3.5" />
-                        <span>AI ચોકસાઈ સ્કોર: {aiConfidence}%</span>
+                        <span>{language === 'gu' ? 'AI ચોકસાઈ સ્કોર' : language === 'hi' ? 'एआई सटीकता स्कोर' : 'AI Accuracy Score'}: {aiConfidence}%</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-xl font-bold text-[#104C35]">{t('aiGeneratedProfile')}</h3>
                         <AudioInstructionButton
-                          text={`${aiTitle[language] || aiTitle.gu || aiTitle.en}. ${aiProblem[language] || aiProblem.gu || aiProblem.en}. ${aiSolution[language] || aiSolution.gu || aiSolution.en}`}
+                          text={`${t('voiceInstructionConfirmation')}. ${aiTitle[language] || aiTitle.gu || aiTitle.en}. ${aiProblem[language] || aiProblem.gu || aiProblem.en}. ${aiSolution[language] || aiSolution.gu || aiSolution.en}`}
                           label={t('readAloud')}
                           size="sm"
                         />
@@ -977,7 +1072,7 @@ function InnovatorPortalContent() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setIsEditingAi(!isEditingAi)}
-                        className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#18251E] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                        className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#18251E] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>{isEditingAi ? 'Done Editing' : t('editInformation')}</span>
@@ -985,16 +1080,21 @@ function InnovatorPortalContent() {
                     </div>
                   </div>
 
+                  {/* Confirmation Audio Note Banner */}
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Volume2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                      <span>{t('voiceInstructionConfirmation')}</span>
+                    </div>
+                    <AudioInstructionButton text={t('voiceInstructionConfirmation')} size="xs" />
+                  </div>
+
                   {/* Assisted credit banner if Option B */}
                   {pathway === 'assisted' && (
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
-                      <strong>સહાયક નોંધણી:</strong> મૂળ શોધક: <u>{innovatorName || 'ગ્રામીણ શોધક'}</u> | નોંધણી કરનાર: <u>{submitterName || 'સ્વયંસેવક'}</u> ({submitterRelationship})
+                      <strong>{language === 'gu' ? 'સહાયક નોંધણી:' : language === 'hi' ? 'सहायक पंजीकरण:' : 'Assisted Submission:'}</strong> {language === 'gu' ? 'મૂળ શોધક:' : language === 'hi' ? 'मूल आविष्कारक:' : 'Inventor:'} <u>{innovatorName || (language === 'gu' ? 'ગ્રામીણ શોધક' : language === 'hi' ? 'ग्रामीण आविष्कारक' : 'Rural Innovator')}</u> | {language === 'gu' ? 'નોંધણી કરનાર:' : language === 'hi' ? 'पंजीकरणकर्ता:' : 'Submitter:'} <u>{submitterName || (language === 'gu' ? 'સ્વયંસેવક' : language === 'hi' ? 'स्वयंसेवक' : 'Volunteer')}</u> ({submitterRelationship})
                     </div>
                   )}
-
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
-                    <span>{t('aiVerificationNotice')}</span>
-                  </div>
 
                   {/* Profile Card Fields */}
                   <div className="space-y-4">
@@ -1082,7 +1182,7 @@ function InnovatorPortalContent() {
                         {t('fieldLocation')}
                       </label>
                       <div className="text-xs text-[#18251E] p-2.5 bg-gray-50 rounded-xl">
-                        {village || 'ગામ'}, {district}, {state}
+                        {village || (language === 'gu' ? 'ગામ પંચાયત વિસ્તાર' : language === 'hi' ? 'ग्राम पंचायत क्षेत्र' : 'Village/Panchayat Area')}, {district}, {state}
                       </div>
                     </div>
                   </div>
@@ -1091,9 +1191,9 @@ function InnovatorPortalContent() {
                   <div className="pt-4 border-t border-emerald-900/10 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <button
                       onClick={() => setStep('location')}
-                      className="w-full sm:w-auto text-xs font-semibold text-[#6B756E] hover:text-[#18251E] py-2"
+                      className="w-full sm:w-auto text-xs font-semibold text-[#6B756E] hover:text-[#18251E] py-2 cursor-pointer"
                     >
-                      Back to Location
+                      {t('backLocation')}
                     </button>
                     <button
                       onClick={handleFinalSubmit}
@@ -1101,7 +1201,7 @@ function InnovatorPortalContent() {
                       className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#176B45] hover:bg-[#104C35] text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-emerald-900/20 transition-all text-sm cursor-pointer"
                     >
                       <Check className="w-5 h-5 text-emerald-300" />
-                      <span>{submitting ? 'Submitting...' : t('confirmAndSubmit')}</span>
+                      <span>{submitting ? t('submittingText') : t('confirmAndSubmit')}</span>
                     </button>
                   </div>
                 </>
@@ -1122,7 +1222,7 @@ function InnovatorPortalContent() {
                     {t('submissionSuccessTitle')}
                   </h2>
                   <AudioInstructionButton
-                    text={`${t('submissionSuccessTitle')}. ${t('submissionSuccessSubtitle')}`}
+                    text={t('voiceInstructionSuccess')}
                     size="sm"
                   />
                 </div>
@@ -1142,7 +1242,7 @@ function InnovatorPortalContent() {
 
                 {submittedInnovation.registrationType === 'assisted' && (
                   <div className="text-xs text-amber-900 bg-amber-50 p-2 rounded-lg border border-amber-200">
-                    મૂળ શોધક: <strong>{submittedInnovation.innovatorName}</strong> • સહાયક: {submittedInnovation.submitterName} ({submittedInnovation.submitterRelationship})
+                    {language === 'gu' ? 'મૂળ શોધક:' : language === 'hi' ? 'मूल आविष्कारक:' : 'Inventor:'} <strong>{submittedInnovation.innovatorName}</strong> • {language === 'gu' ? 'સહાયક:' : language === 'hi' ? 'सहायक:' : 'Submitter:'} {submittedInnovation.submitterName} ({submittedInnovation.submitterRelationship})
                   </div>
                 )}
 
@@ -1153,7 +1253,7 @@ function InnovatorPortalContent() {
                   <span>{submittedInnovation.submissionDate}</span>
                 </div>
                 <div className="text-[11px] text-[#6B756E] pt-2 border-t border-emerald-900/10">
-                  Keep this ID to track review outcomes or recover submission.
+                  {t('keepIdNotice')}
                 </div>
               </div>
 
@@ -1161,15 +1261,16 @@ function InnovatorPortalContent() {
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   onClick={() => window.print()}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-emerald-900/20 bg-white hover:bg-gray-50 text-[#104C35] text-xs font-bold transition-colors"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-emerald-900/20 bg-white hover:bg-gray-50 text-[#104C35] text-xs font-bold transition-colors cursor-pointer"
                 >
-                  {t('saveReceiptBtn')}
+                  <Printer className="w-4 h-4" />
+                  <span>{t('saveReceiptBtn')}</span>
                 </button>
                 <Link
                   href={`/innovations/${submittedInnovation.id}`}
                   className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#176B45] hover:bg-[#104C35] text-white text-xs font-bold transition-colors"
                 >
-                  {t('trackStatusBtn')}
+                  {t('trackStatusBtn')} →
                 </Link>
                 <button
                   onClick={() => {
@@ -1178,7 +1279,7 @@ function InnovatorPortalContent() {
                     setPhotos([]);
                     setVideoUrl(null);
                   }}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-semibold text-[#6B756E] hover:text-[#18251E]"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-semibold text-[#6B756E] hover:text-[#18251E] cursor-pointer"
                 >
                   {t('submitAnotherBtn')}
                 </button>
@@ -1197,7 +1298,7 @@ export default function InnovatorPortalPage() {
       <div className="min-h-screen flex items-center justify-center bg-[#F7FBF8]">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-[#176B45] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-[#176B45] font-semibold">Loading…</p>
+          <p className="text-[#176B45] font-semibold">Loading...</p>
         </div>
       </div>
     }>

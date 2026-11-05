@@ -88,7 +88,7 @@ export default function StakeholderOverviewPage() {
           </div>
           <p className="text-3xl font-extrabold text-amber-700 font-serif">{pendingCount}</p>
           <Link href="/stakeholder/review" className="text-[11px] text-amber-800 hover:underline mt-1 block font-medium">
-            Review submissions &rarr;
+            Review submissions →
           </Link>
         </div>
 
@@ -108,7 +108,7 @@ export default function StakeholderOverviewPage() {
           </div>
           <p className="text-3xl font-extrabold text-[#104C35] font-serif">{connectionCount}</p>
           <Link href="/stakeholder/requests" className="text-[11px] text-emerald-800 hover:underline mt-1 block font-medium">
-            Manage requests &rarr;
+            Manage requests →
           </Link>
         </div>
       </div>

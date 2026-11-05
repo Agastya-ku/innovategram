@@ -5,6 +5,7 @@
     --primary-green: #176B45;
     --dark-green: #104C35;
     --light-green: #EAF5ED;
+    --accent-orange: #E65100;
     --bg-warm: #F8FAF7;
     --text-charcoal: #18251E;
     --text-muted: #6B756E;
@@ -13,7 +14,7 @@
   body {
     background-color: var(--bg-warm);
     color: var(--text-charcoal);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", "Noto Sans Gujarati", Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Noto Sans Gujarati', 'Noto Sans Devanagari', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 }
@@ -36,4 +37,3 @@
   height: 100%;
   border-radius: 0.75rem;
 }
-
